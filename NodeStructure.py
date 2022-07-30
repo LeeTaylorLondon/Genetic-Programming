@@ -179,12 +179,24 @@ class NodeStructure:
                 try:
                     if l.cval is not None and r.cval is not None:
                         p.cval = pv(l.cval, r.cval)
+                        if p.cval == NotImplemented:
+                            print(p.cval, 1) # DEBUG
+                            print(pv, l.cval, r.cval, 'DEBUG184')
                     elif l.cval is not None:
                         p.cval = pv(l.cval, rv)
+                        if p.cval == NotImplemented:
+                            print(p.cval, 2) # DEBUG
+                            print(pv, l.cval, rv, 'DEBUG184')
                     elif r.cval is not None:
                         p.cval = pv(lv, r.cval)
+                        if p.cval == NotImplemented:
+                            print(p.cval, 3) # DEBUG
+                            print(pv, lv, r.cval, 'DEBUG184')
                     else:
                         p.cval = pv(lv, rv)
+                        if p.cval == NotImplemented:
+                            print(p.cval, 4) # DEBUG
+                            print(pv, lv, rv, 'DEBUG184')
                 # Calculations -> catch
                 except TypeError as e:
                     self.print_depth_hashmap()

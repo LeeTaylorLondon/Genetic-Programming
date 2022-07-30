@@ -5,20 +5,24 @@ from types import FunctionType
 # -- Function set definitions & other functions --
 def add(x, y):
     if type(y) is List: return y.__add__(x)
+    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
     return x.__add__(y)
 
 def sub(x, y):
     if type(y) is List: return y.__sub__(x)
+    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
     return x.__sub__(y)
 
 def mul(x, y):
     if type(y) is List: return y.__mul__(x)
+    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
     return x.__mul__(y)
 
 def div(x, y):
-    if y is 0: return x
+    if y == 0: return x
     if type(y) is List: return y.__truediv__(x)
     if type(y) is FunctionType: raise TypeError("other is type 'function'")
+    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
     return x.__truediv__(y)
 
 def obj_func(x, out=True):

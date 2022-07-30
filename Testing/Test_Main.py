@@ -15,12 +15,11 @@ Results:
 # strucs = [nsObj, nsObjC, nsd31]
 
 # AttributeError: 'int' object has no attribute '__div__'
-# Testing ^^^
-x, y = 4, 4
-print(x.__truediv__(y))
-print(4 / 4)
+# x, y = 4, 4
+# # print(x.__truediv__(y))
+# # print(4 / 4)
 
-# Testing Genetic Program
+# Testing Genetic Program 'runs' # of times
 runs = 1350
 for _ in range(runs):
     print('>>>', _, '<<<')
@@ -41,7 +40,8 @@ def test_isleft():
     print(rn, tv)
 
 def outf(arr=None, out=False):
-    """ Print fitness for each population member """
+    """ Print fitness for each population member
+    of passed list 'arr'. """
     if arr is None:
         pass
         # arr = strucs
