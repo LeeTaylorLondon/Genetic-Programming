@@ -77,7 +77,7 @@ class NodeStructure:
         qp, q = [node for node in self.depth_hashmap[d]],\
                 [node for node in self.depth_hashmap[d]]
         # While there are more Node(s) to process execute...
-        while len(q) is not 0:
+        while len(q) != 0:
             # Current node is popped from the queue
             node = q.pop()
             # Check current node depth is higher than max_depth
@@ -101,7 +101,7 @@ class NodeStructure:
         else: t_or_f = rand(0, len(whole_set) - 1)
         if forcef: t_or_f = 0
         # Choose random function
-        if t_or_f is 0: rand_item = rand(0, len(whole_set[t_or_f]) - 1)
+        if t_or_f == 0: rand_item = rand(0, len(whole_set[t_or_f]) - 1)
         # Choose random term where x has a P%-chance to be chosen
         else:
             x_or_c = random()
@@ -119,11 +119,11 @@ class NodeStructure:
         # Queue of nodes to have children
         nodes = [self.root]
         # Stop gen no more children
-        while len(nodes) is not 0:
+        while len(nodes) != 0:
             # Set current_node to nodes[0] & del nodes[0]
             current_node = nodes.pop()
             # Prevent adding children to terminal nodes
-            if current_node.type is "term": continue
+            if current_node.type == "term": continue
             # Create left & right Nodes
             lr = [self.gen_node(current_node, current_node.eval_depth()),
                   self.gen_node(current_node, current_node.eval_depth())]
@@ -135,7 +135,7 @@ class NodeStructure:
                 lr[rand(0, 1)] = self.gen_node(current_node, current_node.eval_depth(), forcef=True)
                 left, right = lr[0], lr[1] # Update left, right values
             # Force ending nodes into terms
-            if current_node.eval_depth() + 1 == self.depth_lim and len(nodes) is 0:
+            if current_node.eval_depth() + 1 == self.depth_lim and len(nodes) == 0:
                 for node in self.depth_hashmap.get(self.depth_lim):
                     if node.eval_type() == 'func': node.force_switch()
             # Set children nodes to left and right
@@ -169,7 +169,7 @@ class NodeStructure:
         # curr_depth = self.depth_lim
         # curr_depth = max(self.depth_max, self.depth_lim)
         curr_depth = 3
-        while curr_depth is not -1:
+        while curr_depth != -1:
             nodes = self.depth_hashmap[curr_depth]
             for n in range(0, len(nodes) - 1, 2):
                 l, r, p = nodes[n], nodes[n+1], nodes[n].parent
@@ -179,24 +179,9 @@ class NodeStructure:
                 try:
                     if l.cval is not None and r.cval is not None:
                         p.cval = pv(l.cval, r.cval)
-                        if p.cval == NotImplemented:
-                            print(p.cval, 1) # DEBUG
-                            print(pv, l.cval, r.cval, 'DEBUG184')
-                    elif l.cval is not None:
-                        p.cval = pv(l.cval, rv)
-                        if p.cval == NotImplemented:
-                            print(p.cval, 2) # DEBUG
-                            print(pv, l.cval, rv, 'DEBUG184')
-                    elif r.cval is not None:
-                        p.cval = pv(lv, r.cval)
-                        if p.cval == NotImplemented:
-                            print(p.cval, 3) # DEBUG
-                            print(pv, lv, r.cval, 'DEBUG184')
-                    else:
-                        p.cval = pv(lv, rv)
-                        if p.cval == NotImplemented:
-                            print(p.cval, 4) # DEBUG
-                            print(pv, lv, rv, 'DEBUG184')
+                    elif l.cval is not None: p.cval = pv(l.cval, rv)
+                    elif r.cval is not None: p.cval = pv(lv, r.cval)
+                    else: p.cval = pv(lv, rv)
                 # Calculations -> catch
                 except TypeError as e:
                     self.print_depth_hashmap()
@@ -249,7 +234,7 @@ class NodeStructure:
             dept_arr = list(nstruc.depth_hashmap.values())[1]
             node_arr = [dept_arr[rand(0, len(dept_arr) - 1)]]
             # raise TypeError(".rand_node() returned None")
-        if len(node_arr) is 1: return node_arr[0]
+        if len(node_arr) == 1: return node_arr[0]
         return node_arr[rand(0, len(node_arr) - 1)]
 
     def isleft(self, node, debug=False):
@@ -273,7 +258,7 @@ class NodeStructure:
     def yield_all_nodes(self):
         """ Yields each Node from a collection of Node(s) """
         q = [self.root]
-        while len(q) is not 0:
+        while len(q) != 0:
             q_top = q.pop()
             if isinstance(q_top.left, Node) and q_top.left is not None:
                 q.append(q_top.left)
@@ -289,7 +274,7 @@ class NodeStructure:
         while True:
             yield_return = ynodes.next()
             if yield_return[0].eval_type() == 'func': count += 1
-            if len(yield_return[1]) is 0:
+            if len(yield_return[1]) == 0:
                 return count
 
     def print_all_nodes(self):
@@ -299,7 +284,7 @@ class NodeStructure:
         while True:
             yield_return = ynodes.next()
             print("nodes.next() -> " + str(yield_return[0]))
-            if len(yield_return[1]) is 0:
+            if len(yield_return[1]) == 0:
                 return
 
     def __copy__(self):

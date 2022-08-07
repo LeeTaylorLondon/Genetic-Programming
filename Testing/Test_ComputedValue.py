@@ -8,6 +8,10 @@ and fix them.
 
 func_set  = (sub, add, mul, div)
 term_set  = (xt(), -5, -4, -3, -2, -1, 1, 2, 3, 4, 5) # Omitted 0
+
+Test results: 'NotImplemented' Did not display in the console. 
+Therefore the problem of 'NotImplemented' is not the result of 
+using a function with two parameters. 
 """
 
 
@@ -22,3 +26,4 @@ if __name__ == '__main__':
             for func in func_set:
                 log.append([left, right, func(left, right)])
                 print(log[len(log)-1][2])
+
