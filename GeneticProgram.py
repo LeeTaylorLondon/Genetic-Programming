@@ -21,25 +21,20 @@ class GeneticProgram:
         to select (in a roulette fashion) two random NodeStructures from
         the self.population. """
         # Init. matrix to store vector(s), vec, for each NodeStructure
-        matrix = [[0, 0, 0, 0] for _ in self.population]
+        matrix = [[0.0, 0.0, 0.0, 0.0] for _ in self.population]
         # vec[0] stores 'fitness value'
         for vec, p in zip(matrix, self.population): vec[0] = measure_fitness(p)
         fitness_summed = sum([vec[0] for vec in matrix])
+        if fitness_summed == 0: raise TypeError('How is the fitness_summed zero?')
         # vec[1] stores 'proportion value'
-        # Todo: ZeroDivisionError: float division by zero
         for vec in matrix:
-            try:
-                vec[1] = 1/(vec[0]/fitness_summed)
-            except ZeroDivisionError as e:
-                vec[1] = 0
-                # raise e
-        # Todo: >end<
+            if float(vec[0]/fitness_summed) == 0:
+                print('vec[0], fitness_summed', vec[0], fitness_summed)
+                raise TypeError('vec[0]/fitness_summed == 0')
+            vec[1] = 1/(float(vec[0]/fitness_summed))
         proportion_summed = sum(vec[1] for vec in matrix)
         # vec[2] stores 'percentage value'
-        try:
-            matrix[0][2] = matrix[0][1]/proportion_summed
-        except ZeroDivisionError:
-            matrix[0][2] = 0
+        matrix[0][2] = matrix[0][1]/proportion_summed
         # vec[3] stores 'rolling sum of % value (from vec[2])'
         matrix[0][3] = matrix[0][1]/proportion_summed
         for i,vec in enumerate(matrix[1:]):

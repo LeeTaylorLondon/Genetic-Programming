@@ -28,6 +28,7 @@ for _ in range(runs):
     print('S2')
     # Todo: fix infinite loop >here<
     sarr = gp.selection()
+    # Todo: fix infinite loop >here<
     print('S3')
     gp._crossover(sarr)
 print (str(runs) + " runs complete!")
