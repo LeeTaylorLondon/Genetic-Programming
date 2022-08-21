@@ -53,7 +53,15 @@ class List(list):
         return List([float(x) for x in self])
 
     def __str__(self):
-        return "X"
+        if len(self) ==  0:
+            return 'Empty List'
+        rv = '['
+        for i in range(len(self) - 1):
+            rv = rv + str(self.__getitem__(i)) + ', '
+        rv = rv + str(self.__getitem__(len(self) - 1))
+        rv = rv + ']'
+        return rv
+        # return "X" # Old way of representing a List
 
     def __repr__(self):
         return self.__str__()

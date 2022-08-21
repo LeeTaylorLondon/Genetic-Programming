@@ -321,12 +321,13 @@ class NodeStructure:
         return rv
 
     def __str__(self):
-        try:
-            return "<NS" + " D:" + str(self.depth_max) + " " + "F:" + str(measure_fitness(self, True)) + ">"
-        except (AttributeError, TypeError) as e:
-            print('self.depth_max', self.depth_max)
-            print('self.depth_hashmap', self.depth_hashmap)
-            raise e
+        # try:
+        #     return "<NS" + " D:" + str(self.depth_max) + " " + "F:" + str(measure_fitness(self, True)) + ">"
+        # except (AttributeError, TypeError) as e:
+        #     print('self.depth_max', self.depth_max)
+        #     print('self.depth_hashmap', self.depth_hashmap)
+        #     raise e
+        return "<NS>"
 
     def __repr__(self):
         return self.__str__()

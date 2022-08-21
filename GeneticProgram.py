@@ -16,41 +16,83 @@ class GeneticProgram:
     def __repr__(self):
         return str(self.population)
 
+    def fitness_check(self):
+        for i,p in enumerate(self.population):
+            if measure_fitness(p, False) == 0.0:
+                return i
+        return -1
+
+    def fitness_replace(self):
+        while 0 < self.fitness_check() <= 3:
+            print('self.fitness_check()', self.fitness_check())
+            # print(self.population) # Redundant while NS.__repr__ is not fit.v.
+            replace_i = self.fitness_check()
+            print('replace_i', replace_i)
+            self.population[replace_i] = NodeStructure()
+            self.pm[0][replace_i] = NodeStructure()
+            print(self.population)
+
     def selection(self, out=False):
+        self.fitness_replace()
         """ Creates values fitness, proportions, and rolling percentages
         to select (in a roulette fashion) two random NodeStructures from
-        the self.population. """
-        # Init. matrix to store vector(s), vec, for each NodeStructure
-        matrix = [[0.0, 0.0, 0.0, 0.0] for _ in self.population]
-        # vec[0] stores 'fitness value'
-        for vec, p in zip(matrix, self.population): vec[0] = measure_fitness(p)
+        the self.population. 
+        
+        value 'matrix' stores vectors of 4 values for each pop. member
+        vec[0] -> value fitness  
+        vec[1] -> value proportion
+        vec[2] -> value percentage 
+        vec[3] -> value rolling sum of %
+        """
+        # Init. matrix
+        matrix = [[1.0, 0.0, 0.0, 0.0] for _ in self.population]
+        # vec[0]
+        for vec, p in zip(matrix, self.population): vec[0] = max(1.0, measure_fitness(p))
         fitness_summed = sum([vec[0] for vec in matrix])
         if fitness_summed == 0: raise TypeError('How is the fitness_summed zero?')
-        # vec[1] stores 'proportion value'
+        # vec[1]
         for vec in matrix:
-            if float(vec[0]/fitness_summed) == 0:
-                print('vec[0], fitness_summed', vec[0], fitness_summed)
+            if float(vec[0]/fitness_summed) == 0.0:
+                print('fitness_summed ->', fitness_summed)
+                for p in self.population:
+                    mfp = measure_fitness(p)
+                    print('measure_fitness(p) ->', mfp)
+                    if mfp == 0:
+                        print('vec[0] ->', vec[0])
+                        print('p.root.cval ->', p.root.cval)
                 raise TypeError('vec[0]/fitness_summed == 0')
             vec[1] = 1/(float(vec[0]/fitness_summed))
         proportion_summed = sum(vec[1] for vec in matrix)
-        # vec[2] stores 'percentage value'
-        matrix[0][2] = matrix[0][1]/proportion_summed
-        # vec[3] stores 'rolling sum of % value (from vec[2])'
-        matrix[0][3] = matrix[0][1]/proportion_summed
+        matrix[0][2] = matrix[0][1]/proportion_summed # vec[2]
+        matrix[0][3] = matrix[0][1]/proportion_summed # vec[3]
         for i,vec in enumerate(matrix[1:]):
             vec[2] = vec[1]/proportion_summed
             vec[3] = matrix[i][3] + vec[2]
         # Roulette selection ~ rf = randomfloat, s = selection
         rf1, rf2, s1, s2 = rf(), rf(), None, None
         while s1 is None or s2 is None or s1 == s2:
+            # Generate random float for selection boundry
             if rf1 < matrix[0][3]: s1 = 0
             if rf2 < matrix[0][3]: s2 = 0
+            # if rfx within boundary and current selection is None
             for i,vec in enumerate(matrix):
                 if matrix[i][3] < rf1 <= matrix[i+1][3] and s1 is None: s1 = i + 1
                 if matrix[i][3] < rf2 <= matrix[i+1][3] and s2 is None: s2 = i + 1
-            if s1 is None: rf1, s1 = rf(), None
-            if s2 is None: rf2, s2 = rf(), None
-            if s1 == s2: rf1, rf2, s1, s2 = rf(), rf(), None, None
+            if s1 is None:
+                rf1, s1 = rf(), None
+                print('rf1, rf2, s1, s2')
+                print(rf1, rf2, s1, s2)
+                print(matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3])
+                raise TypeError ('Why is this none?')
+            if s2 is None:
+                rf2, s2 = rf(), None
+                print('rf1, rf2, s1, s2')
+                print(rf1, rf2, s1, s2)
+                print(matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3])
+                raise TypeError ('Why is this none?')
+            # Todo: optional - prevent selecting itself
+            if s1 == s2:
+                break
         # Debug information
         if out:
             print([vec[3] for vec in matrix])
