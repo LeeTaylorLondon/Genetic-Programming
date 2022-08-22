@@ -17,12 +17,15 @@ class GeneticProgram:
         return str(self.population)
 
     def fitness_check(self):
+        """ Check fitness of each population member """
         for i,p in enumerate(self.population):
+            # if fitness of p is 0 then replace that one by index
             if measure_fitness(p, False) == 0.0:
                 return i
         return -1
 
     def fitness_replace(self):
+        """ Replace unfit population member. Unfit -> fitness(p) = 0.0 """
         while 0 < self.fitness_check() <= 3:
             print('self.fitness_check()', self.fitness_check())
             # print(self.population) # Redundant while NS.__repr__ is not fit.v.
@@ -33,41 +36,43 @@ class GeneticProgram:
             print(self.population)
 
     def selection(self, out=False):
-        self.fitness_replace()
         """ Creates values fitness, proportions, and rolling percentages
         to select (in a roulette fashion) two random NodeStructures from
-        the self.population. 
-        
+        the self.population.
+
         value 'matrix' stores vectors of 4 values for each pop. member
-        vec[0] -> value fitness  
-        vec[1] -> value proportion
-        vec[2] -> value percentage 
-        vec[3] -> value rolling sum of %
+        read it top-left -> going-down -> then-across (columns not rows)
+        vec[0]  | vec[1]     | vec[2]     | vec[3]
+        fitness | proportion | percentage | rolling sum of %
+        [132.7, 2.09, 0.1, 0.1]
+        [68.7, 4.03, 0.19, 0.28]
+        [46.6, 5.94, 0.27, 0.56]
+        [28.7, 9.64, 0.44, 1.0]
         """
+        # self.fitness_replace() # debug
         # Init. matrix
         matrix = [[1.0, 0.0, 0.0, 0.0] for _ in self.population]
         # vec[0]
-        for vec, p in zip(matrix, self.population): vec[0] = max(1.0, measure_fitness(p))
+        for vec, p in zip(matrix, self.population):
+            vec[0] = max(1.0, measure_fitness(p))
         fitness_summed = sum([vec[0] for vec in matrix])
-        if fitness_summed == 0: raise TypeError('How is the fitness_summed zero?')
         # vec[1]
         for vec in matrix:
-            if float(vec[0]/fitness_summed) == 0.0:
-                print('fitness_summed ->', fitness_summed)
-                for p in self.population:
-                    mfp = measure_fitness(p)
-                    print('measure_fitness(p) ->', mfp)
-                    if mfp == 0:
-                        print('vec[0] ->', vec[0])
-                        print('p.root.cval ->', p.root.cval)
-                raise TypeError('vec[0]/fitness_summed == 0')
             vec[1] = 1/(float(vec[0]/fitness_summed))
         proportion_summed = sum(vec[1] for vec in matrix)
-        matrix[0][2] = matrix[0][1]/proportion_summed # vec[2]
-        matrix[0][3] = matrix[0][1]/proportion_summed # vec[3]
+        # vec[2] & vec[3]
+        matrix[0][2] = matrix[0][1]/proportion_summed
+        matrix[0][3] = matrix[0][1]/proportion_summed
         for i,vec in enumerate(matrix[1:]):
             vec[2] = vec[1]/proportion_summed
             vec[3] = matrix[i][3] + vec[2]
+        ''' Debug '''
+        for vec in matrix:
+            for i, elm in enumerate(vec):
+                vec[i] = round(elm, 2)
+        for vec in matrix: print(vec)
+        # raise TypeError('Testing End')
+        ''' Debug '''
         # Roulette selection ~ rf = randomfloat, s = selection
         rf1, rf2, s1, s2 = rf(), rf(), None, None
         while s1 is None or s2 is None or s1 == s2:

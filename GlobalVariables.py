@@ -38,7 +38,7 @@ def measure_fitness(nstruc, clear_cval=False):
      the object fucntion and generated NodeStructure. """
     desired_y   = obj_func(None, out=False)
     produced_y  = nstruc.interpreter(out=False)
-    summed_diff = 0
+    summed_diff = 0.0
     if type(produced_y) is List:
         for dy,py in zip(desired_y, produced_y):
             summed_diff += abs(py - dy)
@@ -54,7 +54,7 @@ def measure_fitness(nstruc, clear_cval=False):
     nstruc.fitness = summed_diff
     if clear_cval: nstruc.reset_cval_all_c()
     del desired_y, produced_y
-    return summed_diff
+    return float(summed_diff)
 
 def return_xt():
     rv = [float(n_)/10 for n_ in range(-10, 11, 1)]

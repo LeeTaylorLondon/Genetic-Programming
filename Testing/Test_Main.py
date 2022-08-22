@@ -26,17 +26,13 @@ Results:
 # print(efg)
 
 ''' Testing Genetic Program 'runs' # of times '''
-runs = 500_000
+runs = 15_350
 for _ in range(runs):
-    print('>>>', _, '<<<')
-    print('S1')
+    print(f'RUN_i: >>> {_} <<<')
     gp   = GeneticProgram()
-    print('S2')
-    # Todo: fix infinite loop >here<
     sarr = gp.selection()
-    # Todo: fix infinite loop >here<
-    print('S3')
     gp._crossover(sarr)
+    print('PASSED: S1-S2-S3\n')
 print (str(runs) + " runs complete!")
 
 ''' TEST: Unknown '''
