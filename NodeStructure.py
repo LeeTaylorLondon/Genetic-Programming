@@ -111,7 +111,9 @@ class NodeStructure:
         # Construct Node
         node = Node(whole_set[t_or_f][rand_item], None, None, parent)
         # Store a copy of xt as the value
-        if node.val == xt: node.val = xt()
+        if node.val == xt:
+            node.val = xt()
+            print(node.val)
         return node
 
     def gen_structure(self):
@@ -327,7 +329,8 @@ class NodeStructure:
         #     print('self.depth_max', self.depth_max)
         #     print('self.depth_hashmap', self.depth_hashmap)
         #     raise e
-        return "<NS>"
+        return f'<NS {measure_fitness(self)}>'
+        # return "<NS>"
 
     def __repr__(self):
         return self.__str__()

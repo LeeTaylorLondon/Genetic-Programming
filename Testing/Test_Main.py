@@ -1,5 +1,5 @@
 from Classes import NodeStructure, GeneticProgram, List
-from GlobalVariables import func_set, measure_fitness
+from GlobalVariables import func_set, measure_fitness, xt
 
 # Testing NodeStructure.__copy__()
 # nsObj = NodeStructure()
@@ -25,14 +25,20 @@ Results:
 # efg = List(abc)
 # print(efg)
 
+''' TEST: Activating List for Node '''
+something = xt
+if something == xt:
+    something = xt()
+print(something, type(something))
+
 ''' Testing Genetic Program 'runs' # of times '''
-runs = 15_350
+runs = 12_400
 for _ in range(runs):
-    print(f'RUN_i: >>> {_} <<<')
+    # print(f'RUN_i: >>> {_} <<<')
     gp   = GeneticProgram()
     sarr = gp.selection()
     gp._crossover(sarr)
-    print('PASSED: S1-S2-S3\n')
+    # print('PASSED: S1-S2-S3\n')
 print (str(runs) + " runs complete!")
 
 ''' TEST: Unknown '''

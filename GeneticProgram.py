@@ -42,8 +42,10 @@ class GeneticProgram:
 
         value 'matrix' stores vectors of 4 values for each pop. member
         read it top-left -> going-down -> then-across (columns not rows)
+        ------------------------------------------------------
         vec[0]  | vec[1]     | vec[2]     | vec[3]
         fitness | proportion | percentage | rolling sum of %
+        ------------------------------------------------------
         [132.7, 2.09, 0.1, 0.1]
         [68.7, 4.03, 0.19, 0.28]
         [46.6, 5.94, 0.27, 0.56]
@@ -51,10 +53,14 @@ class GeneticProgram:
         """
         # self.fitness_replace() # debug
         # Init. matrix
-        matrix = [[1.0, 0.0, 0.0, 0.0] for _ in self.population]
+        matrix = [[0.0, 0.0, 0.0, 0.0] for _ in self.population]
         # vec[0]
         for vec, p in zip(matrix, self.population):
-            vec[0] = max(1.0, measure_fitness(p))
+            mfp = measure_fitness(p)
+            if mfp == 0:
+                vec[0] = 9999.9 # Todo: replace with found-end!
+                print('9999.9')
+            else: vec[0] = mfp
         fitness_summed = sum([vec[0] for vec in matrix])
         # vec[1]
         for vec in matrix:
@@ -67,10 +73,10 @@ class GeneticProgram:
             vec[2] = vec[1]/proportion_summed
             vec[3] = matrix[i][3] + vec[2]
         ''' Debug '''
-        for vec in matrix:
-            for i, elm in enumerate(vec):
-                vec[i] = round(elm, 2)
-        for vec in matrix: print(vec)
+        # for vec in matrix:
+        #     for i, elm in enumerate(vec):
+        #         vec[i] = round(elm, 2)
+        # for vec in matrix: print(vec)
         # raise TypeError('Testing End')
         ''' Debug '''
         # Roulette selection ~ rf = randomfloat, s = selection
@@ -83,21 +89,10 @@ class GeneticProgram:
             for i,vec in enumerate(matrix):
                 if matrix[i][3] < rf1 <= matrix[i+1][3] and s1 is None: s1 = i + 1
                 if matrix[i][3] < rf2 <= matrix[i+1][3] and s2 is None: s2 = i + 1
-            if s1 is None:
-                rf1, s1 = rf(), None
-                print('rf1, rf2, s1, s2')
-                print(rf1, rf2, s1, s2)
-                print(matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3])
-                raise TypeError ('Why is this none?')
-            if s2 is None:
-                rf2, s2 = rf(), None
-                print('rf1, rf2, s1, s2')
-                print(rf1, rf2, s1, s2)
-                print(matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3])
-                raise TypeError ('Why is this none?')
+            if s1 is None: rf1, s1 = rf(), None
+            if s2 is None:  rf2, s2 = rf(), None
             # Todo: optional - prevent selecting itself
-            if s1 == s2:
-                break
+            if s1 == s2: break
         # Debug information
         if out:
             print([vec[3] for vec in matrix])
