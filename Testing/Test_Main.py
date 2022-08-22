@@ -32,13 +32,15 @@ if something == xt:
 print(something, type(something))
 
 ''' Testing Genetic Program 'runs' # of times '''
-runs = 12_400
+bug_counter = [0]
+runs = 6_000
 for _ in range(runs):
     # print(f'RUN_i: >>> {_} <<<')
     gp   = GeneticProgram()
-    sarr = gp.selection()
+    sarr = gp.selection(bug_counter)
     gp._crossover(sarr)
     # print('PASSED: S1-S2-S3\n')
+print(f'Bug counter: {bug_counter}')
 print (str(runs) + " runs complete!")
 
 ''' TEST: Unknown '''

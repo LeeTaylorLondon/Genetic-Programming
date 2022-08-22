@@ -35,7 +35,7 @@ class GeneticProgram:
             self.pm[0][replace_i] = NodeStructure()
             print(self.population)
 
-    def selection(self, out=False):
+    def selection(self, debug_counter, out=False):
         """ Creates values fitness, proportions, and rolling percentages
         to select (in a roulette fashion) two random NodeStructures from
         the self.population.
@@ -60,6 +60,7 @@ class GeneticProgram:
             if mfp == 0:
                 vec[0] = 9999.9 # Todo: replace with found-end!
                 print('9999.9')
+                debug_counter[0] += 1
             else: vec[0] = mfp
         fitness_summed = sum([vec[0] for vec in matrix])
         # vec[1]
