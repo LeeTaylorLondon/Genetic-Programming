@@ -329,7 +329,7 @@ class NodeStructure:
         #     print('self.depth_max', self.depth_max)
         #     print('self.depth_hashmap', self.depth_hashmap)
         #     raise e
-        return f'<NS {measure_fitness(self)}>'
+        return f'<NS {round(float(measure_fitness(self)), 2)}>'
         # return "<NS>"
 
     def __repr__(self):

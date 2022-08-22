@@ -1,5 +1,5 @@
 from Classes import NodeStructure
-from GlobalVariables import measure_fitness, term_set, func_set
+from GlobalVariables import measure_fitness, obj_func, term_set, func_set
 from random import random as rf
 from random import randint as rand
 
@@ -23,6 +23,18 @@ class GeneticProgram:
             if measure_fitness(p, False) == 0.0:
                 return i
         return -1
+
+    def fitness_check_desired(self, i):
+        """ class.GeneticProgram.fitness_check() returns the index
+        of a population member with 0.0 fitness. This function checks
+        the equality of the computed-value and objective-function.
+        Computed-value from the population member with a fitness of 0.
+        """
+        root_cval = self.population[i].root.cval
+        objective = obj_func(None, out=False)
+        for x,y in zip(root_cval, objective):
+            if x != y: return False
+        return True
 
     def fitness_replace(self):
         """ Replace unfit population member. Unfit -> fitness(p) = 0.0 """
@@ -59,7 +71,7 @@ class GeneticProgram:
             mfp = measure_fitness(p)
             if mfp == 0:
                 vec[0] = 9999.9 # Todo: replace with found-end!
-                print('9999.9')
+                # print('9999.9')
                 debug_counter[0] += 1
             else: vec[0] = mfp
         fitness_summed = sum([vec[0] for vec in matrix])
@@ -151,33 +163,33 @@ class GeneticProgram:
     def iterations(self, criteria=1.5):
         """ Calls ._evolution() = No. of new population member(s) """
         # Todo: review & re-create this method
-        act_crit = 99
-        iteration = 0
-        print(self.pm)
-        # for nstruc in self.population: nstruc.print_depth_hashmap()
-        while not act_crit <= criteria and iteration != 50:
-            # Create vector for next population Todo: Fix this
-            print(act_crit, self.pm)
-            iteration += 1
-            if len(self.pm) != iteration + 1: self.pm.append([])
-            # Perform evolution
-            try:
-                while len(self.pm[iteration]) != self.pcount:
-                    sarr = [s1, s2] = self.selection()
-                    self.pm[iteration].append(self._evolution(sarr))
-                for nstruc in self.pm[iteration]:
-                    # nstruc.print_depth_hashmap()
-                    if measure_fitness(nstruc) < act_crit:
-                        nstruc.refresh_depth_hashmap()
-                        nstruc.reset_cval_all_c()
-                        act_crit = measure_fitness(nstruc)
-                        print("act_crit", act_crit)
-                self.population = None
-                self.population = [nstruc.__copy__() for nstruc in self.pm[iteration]]
-            except IndexError as e:
-                print(self.pm)
-                print("iteration:", iteration)
-                raise e
+        # act_crit = 99
+        # iteration = 0
+        # print(self.pm)
+        # # for nstruc in self.population: nstruc.print_depth_hashmap()
+        # while not act_crit <= criteria and iteration != 50:
+        #     # Create vector for next population Todo: Fix this
+        #     print(act_crit, self.pm)
+        #     iteration += 1
+        #     if len(self.pm) != iteration + 1: self.pm.append([])
+        #     # Perform evolution
+        #     try:
+        #         while len(self.pm[iteration]) != self.pcount:
+        #             sarr = [s1, s2] = self.selection()
+        #             self.pm[iteration].append(self._evolution(sarr))
+        #         for nstruc in self.pm[iteration]:
+        #             # nstruc.print_depth_hashmap()
+        #             if measure_fitness(nstruc) < act_crit:
+        #                 nstruc.refresh_depth_hashmap()
+        #                 nstruc.reset_cval_all_c()
+        #                 act_crit = measure_fitness(nstruc)
+        #                 print("act_crit", act_crit)
+        #         self.population = None
+        #         self.population = [nstruc.__copy__() for nstruc in self.pm[iteration]]
+        #     except IndexError as e:
+        #         print(self.pm)
+        #         print("iteration:", iteration)
+        #         raise e
         pass
 
 def test_crossover():
