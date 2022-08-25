@@ -53,6 +53,10 @@ class List(list):
         return List([float(x) for x in self])
 
     def __str__(self):
+        return 'X'
+        # return "X" # Old way of representing a List
+
+    def __repr__(self):
         if len(self) ==  0:
             return 'Empty List'
         rv = '['
@@ -62,9 +66,7 @@ class List(list):
         rv = rv + ']'
         return rv
         # return "X" # Old way of representing a List
-
-    def __repr__(self):
-        return self.__str__()
+        # return self.__str__()
 
     def printv(self):
         rv = "["

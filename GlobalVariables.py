@@ -25,6 +25,10 @@ def div(x, y):
     if type(y) is float and type(x) is not List: x, y = float(x), float(y)
     return x.__truediv__(y)
 
+def funcrepr(func):
+    # todo: test
+    return str(func).split[1]
+
 def obj_func(x, out=True):
     """ Objective behaviour as a function """
     if x is None: x = [float(x)/10 for x in range(-10, 11, 1)]
