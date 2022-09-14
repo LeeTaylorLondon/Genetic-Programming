@@ -1,5 +1,6 @@
 from typing import List, NoReturn, Tuple
 from Classes import NodeStructure
+from GlobalVariables import func_set, term_set, funcrepr
 import pygame
 
 
@@ -9,7 +10,7 @@ D_BLUE = (0, 32, 96)
 WIDTH, HEIGHT = 780, 450
 
 
-def create_text(arr, font_size:int) -> List[pygame.font.SysFont]:
+def create_text(arr, font_size) -> List[pygame.font.SysFont]:
     rv = []
     font = pygame.font.SysFont('chalkduster.tff', font_size)
     for s in arr:
@@ -45,7 +46,8 @@ class Window:
             for i,arr in enumerate(self.nss[0].depth_hashmap.values()):
                 vec = []
                 for val in arr:
-                    vec.append(create_text(str(val.val), 32))
+                    if val in func_set: vec.append(str(funcrepr(val.val)))
+                    else: vec.append(create_text(str(val.val), 32))
                 self.nst[nstarr - 1].append(vec)
         if debug:
             for arr in self.nst:
@@ -64,16 +66,23 @@ class Window:
                     if event.key == pygame.K_q:
                         self.run = False
                     if event.key == pygame.K_t:
-                        self.load_node_structure()
+                        pass
+                        # self.load_node_structure()
                     if event.key == pygame.K_d:
-                        self.load_node_structure()
-                        self.screen.blit(self.nst[0][0][0][0], (0, 0))
+                        pass
+                        # self.load_node_structure()
+                        # self.screen.blit(self.nst[0][0][0][0], (0, 0))
                         # self.draw_text(self.position_node_structure())
                     if event.key == pygame.K_c:
                         pass
             self.screen.fill(WHITE)
             # --[render start]--
+            # print(self.nst[0][0][0], type(self.nst[0][0][0]))
             self.screen.blit(self.nst[0][0][0][0], (0, 0))
+            self.screen.blit(self.nst[0][0][0][0], (20, 0))
+
+            self.screen.blit(create_text('yo', 32), (0, 100))
+
             # --[render end]--
             pygame.display.flip()
             self.clock.tick(144)

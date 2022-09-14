@@ -27,7 +27,7 @@ def div(x, y):
 
 def funcrepr(func):
     # todo: test
-    return str(func).split[1]
+    return str(func).split()[1]
 
 def obj_func(x, out=True):
     """ Objective behaviour as a function """

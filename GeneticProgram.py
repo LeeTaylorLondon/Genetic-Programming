@@ -85,13 +85,6 @@ class GeneticProgram:
         for i,vec in enumerate(matrix[1:]):
             vec[2] = vec[1]/proportion_summed
             vec[3] = matrix[i][3] + vec[2]
-        ''' Debug '''
-        # for vec in matrix:
-        #     for i, elm in enumerate(vec):
-        #         vec[i] = round(elm, 2)
-        # for vec in matrix: print(vec)
-        # raise TypeError('Testing End')
-        ''' Debug '''
         # Roulette selection ~ rf = randomfloat, s = selection
         rf1, rf2, s1, s2 = rf(), rf(), None, None
         while s1 is None or s2 is None or s1 == s2:
@@ -110,6 +103,7 @@ class GeneticProgram:
         if out:
             print([vec[3] for vec in matrix])
             print(str(rf1) + " " + str(rf2) + " " + str(s1) + " " + str(s2) + '\n')
+        if s1 == s2: raise TypeError("Equal Selection!")
         return s1, s2
 
     def move_popualtion(self):
@@ -118,28 +112,44 @@ class GeneticProgram:
         """
         pass
 
-    def _crossover(self, sarr):
+    def crossover(self, sarr, debug=True):
         """ :param sarr: Selection Array contains index values for which
         population members are to be selected. """
         # Unpack selection array & assign values
         s1, s2 = sarr
         p1, p2 = self.population[s1], self.population[s2]
+        if debug:
+            print("BEFORE")
+            p1.print_depth_hashmap()
+            p2.print_depth_hashmap()
         sn1 = selected_node1 = p1.rand_node()
         sn2 = selected_node2 = p2.rand_node(ntype=sn1.eval_type())
+        if debug:
+            print("^^ SN1 : SN2 ^^")
+            print(sn1)
+            print(sn2)
+            print("================================")
         # Do not perform crossover if two of the same type do not exist
-        # Todo: change this so that it is compatible to do so without error
+        # Todo: change return condition here
         if sn1.eval_type() != sn2.eval_type(): return
         # Overwrite sn1.val
-        if sn2.val in func_set: sn1.val = sn2.val
+        if sn2.val in func_set:
+            sn1.val = sn2.val
         elif sn2.val in term_set and term_set.index(sn2.val) != 0:
             sn1.val = term_set.index(sn2.val)
-        else: sn1.val = term_set[0]
+        else:
+            sn1.val = term_set[0] # Todo: this might be wrong
         # Reset computed-value
         sn1.cval = None
         p1.reset_cval_all_c()
         # Overwrite left & right
         sn1.left  = sn2.left
         sn1.right = sn2.right
+        if debug:
+            print("AFTER")
+            p1.print_depth_hashmap()
+            p2.print_depth_hashmap()
+
 
     def _mutate(self, sarr, chance_for_mutant=0.3):
         # 30% to generate a new subtree 70% to switch a value
