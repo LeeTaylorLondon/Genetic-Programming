@@ -93,6 +93,13 @@ class NodeStructure:
         # if update_self: self.depth_max = max_d
         return max_d
 
+    def set_node_depths(self):
+        """ Set Node.depth for each Node in a NodeStruc
+        Used for GUI/GUI.py """
+        for arr in self.depth_hashmap.values():
+            for node in arr:
+                node.depth = node.eval_depth()
+
     ''' Generation methods '''
     def gen_node(self, parent, curr_depth, forcef=False):
         """ Generate an individual func. or term. as a Node """
@@ -238,23 +245,6 @@ class NodeStructure:
             # raise TypeError(".rand_node() returned None")
         if len(node_arr) == 1: return node_arr[0]
         return node_arr[rand(0, len(node_arr) - 1)]
-
-    def isleft(self, node, debug=False):
-        """ Returns TRUE if the node is the left of another node
-         otherwise returns false. """
-        for depthlevel in self.depth_hashmap.values():
-            if node in depthlevel:
-                # Debug
-                if debug:
-                    print("---DEBUG---")
-                    print("depthlevel:", depthlevel)
-                    print("node:", node)
-                    print("depthlevel.index(node):", depthlevel.index(node))
-                    print("^ % 2 == 0", depthlevel.index(node) % 2)
-                    print("---DEBUG---")
-                # Debug
-                return depthlevel.index(node) % 2 == 0
-        raise TypeError("isleft should have returned False or True")
 
     ''' Other methods '''
     def yield_all_nodes(self):

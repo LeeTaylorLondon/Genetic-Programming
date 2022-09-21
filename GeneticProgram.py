@@ -66,7 +66,7 @@ class GeneticProgram:
         # self.fitness_replace() # debug
         # Init. matrix
         matrix = [[0.0, 0.0, 0.0, 0.0] for _ in self.population]
-        # vec[0]
+        # calculate and populate vec[0]
         for vec, p in zip(matrix, self.population):
             mfp = measure_fitness(p)
             if mfp == 0:
@@ -75,11 +75,11 @@ class GeneticProgram:
                 debug_counter[0] += 1
             else: vec[0] = mfp
         fitness_summed = sum([vec[0] for vec in matrix])
-        # vec[1]
+        # calculate and populate vec[1]
         for vec in matrix:
             vec[1] = 1/(float(vec[0]/fitness_summed))
         proportion_summed = sum(vec[1] for vec in matrix)
-        # vec[2] & vec[3]
+        # calculate and populate vec[2] & vec[3]
         matrix[0][2] = matrix[0][1]/proportion_summed
         matrix[0][3] = matrix[0][1]/proportion_summed
         for i,vec in enumerate(matrix[1:]):
@@ -96,14 +96,16 @@ class GeneticProgram:
                 if matrix[i][3] < rf1 <= matrix[i+1][3] and s1 is None: s1 = i + 1
                 if matrix[i][3] < rf2 <= matrix[i+1][3] and s2 is None: s2 = i + 1
             if s1 is None: rf1, s1 = rf(), None
-            if s2 is None:  rf2, s2 = rf(), None
-            # Todo: optional - prevent selecting itself
-            if s1 == s2: break
+            if s2 is None: rf2, s2 = rf(), None
+            # Todo: optional - prevent selecting itself - enters infinite loop
+            if s1 == s2:
+                break
+                # rf1, rf2 = rf(), rf()
+        # if s1 == s2: raise TypeError("Equal Selection!")
         # Debug information
         if out:
             print([vec[3] for vec in matrix])
             print(str(rf1) + " " + str(rf2) + " " + str(s1) + " " + str(s2) + '\n')
-        if s1 == s2: raise TypeError("Equal Selection!")
         return s1, s2
 
     def move_popualtion(self):

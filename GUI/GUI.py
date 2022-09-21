@@ -13,8 +13,11 @@ WIDTH, HEIGHT = 780, 450
 def create_text(arr, font_size) -> List[pygame.font.SysFont]:
     rv = []
     font = pygame.font.SysFont('chalkduster.tff', font_size)
-    for s in arr:
-        rv.append(font.render(s, True, BLACK))
+    if type(arr) == list:
+        for string in arr:
+            rv.append(font.render(string, True, BLACK))
+    elif type(arr) == str:
+        rv.append(font.render(arr, True, BLACK))
     return rv
 
 
@@ -32,8 +35,6 @@ class Window:
         #                          "[Key C: Clear Input]"],
         #                         16)
         self.nss = [NodeStructure()] # nss = NodeStructure(s)
-        self.nst = [[] for _ in self.nss] # nst = NodeStructureText
-        self.nsp = [[] for _ in self.nss] # nsp = NodeStructurePos
         # continuous loop
         self.render()
 
@@ -41,47 +42,25 @@ class Window:
         for text_obj, xy_pair in zip(self.nst[0][0], coords):
             self.screen.blit(text_obj, xy_pair)
 
-    def load_node_structure(self, debug=True):
-        for nstarr in range(len(self.nst)):
-            for i,arr in enumerate(self.nss[0].depth_hashmap.values()):
-                vec = []
-                for val in arr:
-                    if val in func_set: vec.append(str(funcrepr(val.val)))
-                    else: vec.append(create_text(str(val.val), 32))
-                self.nst[nstarr - 1].append(vec)
-        if debug:
-            for arr in self.nst:
-                for vec in arr:
-                    print(vec)
-
-    def position_node_structure(self) -> List[Tuple[int, int]]:
-        x, y = int(WIDTH / 2), int(HEIGHT / 2)
-        return [(x, y)]
-
     def render(self) -> NoReturn:
-        self.load_node_structure()
+        self.nss[0].set_node_depths()
+        self.nss[0].print_depth_hashmap()
         while self.run:
             for event in pygame.event.get():
+                # Bind key to function(s)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self.run = False
                     if event.key == pygame.K_t:
                         pass
-                        # self.load_node_structure()
                     if event.key == pygame.K_d:
                         pass
-                        # self.load_node_structure()
-                        # self.screen.blit(self.nst[0][0][0][0], (0, 0))
-                        # self.draw_text(self.position_node_structure())
                     if event.key == pygame.K_c:
                         pass
             self.screen.fill(WHITE)
             # --[render start]--
-            # print(self.nst[0][0][0], type(self.nst[0][0][0]))
-            self.screen.blit(self.nst[0][0][0][0], (0, 0))
-            self.screen.blit(self.nst[0][0][0][0], (20, 0))
 
-            self.screen.blit(create_text('yo', 32), (0, 100))
+            self.screen.blit(create_text('Sample text', 48)[0], (0, 0))
 
             # --[render end]--
             pygame.display.flip()

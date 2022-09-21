@@ -23,6 +23,7 @@ class Node:
         self.right  = right
         self.parent = parent
         self.queued = False
+        self.depth  = None # Used in GUI/GUI.py
         self.mark_calc = False # Denotes if it's already added to a calculation
 
     def has_children(self):
@@ -70,8 +71,8 @@ class Node:
         return self.__repr__()
 
     def __repr__(self):
-        if self.cval is None: return "<D=" + str(self.eval_depth()) + "|" + self.printf(self.val) + ">"
-        else: return "<D=" + str(self.eval_depth()) + "|" + self.printf(self.val) + "|" + self.printf(self.cval) + ">"
+        if self.cval is None: return "<D=" + str(self.depth) + "|" + self.printf(self.val) + ">"
+        else: return "<D=" + str(self.depth) + "|" + self.printf(self.val) + "|" + self.printf(self.cval) + ">"
 
     def __copy__(self, arr=None):
         """ Node Attrs: val, cval, type, left, right, parent, mark_Calc, queued
