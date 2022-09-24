@@ -1,7 +1,7 @@
 import pygame.draw
-from Classes import NodeStructure
-from GlobalVariables import measure_fitness
-from Consts import BLACK, WHITE, D_BLUE, create_text
+from Classes import NodeStructure, Node, List
+from GlobalVariables import measure_fitness, funcrepr
+from Consts import BLACK, WHITE, D_BLUE, create_text, create_text_str
 
 """
 Purpose: GUI version of NodeStructure, this class is used 
@@ -22,35 +22,55 @@ Create relativity calculations. Possibly impose the whole NS-GUI
 
 # ------ Class Definition Start ------
 class NodeGUI(Node):
-    def __init__(self, screen):
-        super(NodeGUI, self).__init__()
+    def __init__(self, node, screen):
+        super(NodeGUI, self).__init__(val=node.val)
         self.screen        = screen
-        self.render_matrix = []
-        self.pygame_text   = create_text(self.val, 12)
+        self.pygame_val    = self.init_pygame_val()
+        self.pygame_text   = create_text_str(self.pygame_val, 18, WHITE)
         self.pygame_textr  = self.pygame_text.get_rect()
         self.pygame_coords = [0, 0] # x,y
-        self.pygame_radius = 18
+        self.pygame_radius = 32
+
+    def init_pygame_val(self):
+        if type(self.val) != list and type(self.val) != int and type(self.val) != List:
+            return funcrepr(self.val)
+        else: return str(self.val)
+
+    def set_pygame_coords(self, x, y):
+        self.pygame_coords[0], self.pygame_coords[1] = x, y
 
     def render(self):
-        """ When called a circle with it's value should be rendered """
+        """ A circle with it's value should be rendered """
         pygame.draw.circle(self.screen, BLACK, self.pygame_coords, self.pygame_radius)
-        self.textr.center = (self.pygame_coords[0], self.pygame_coords[1])
+        self.pygame_textr.center = (self.pygame_coords[0], self.pygame_coords[1])
         self.screen.blit(self.pygame_text, self.pygame_textr)
 # ------ Class Definition End ------
 
 
 # ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
-    def __init__(self):
+    def __init__(self, screen):
         super(NodeStructureGUI, self).__init__()
-        self.circle_objects = []
+        self.screen         = screen
+        self.circle_objects = self.init_circle_objects()
 
     def init_circle_objects(self):
-        for arr in self.depth_hashmap:
+        render_matrix, x, y = [], 0, 0
+        for arr in self.depth_hashmap.values():
+            y += 75
             i_arr = []
             for node in arr:
-                i_arr.append(node)
-            self.render_matrix.append(i_arr)
+                x += 75
+                n_gui_obj = NodeGUI(node, self.screen)
+                n_gui_obj.set_pygame_coords(x, y)
+                i_arr.append(n_gui_obj)
+            render_matrix.append(i_arr)
+        return render_matrix
+
+    def render(self):
+        for array in self.circle_objects:
+            for node in array:
+                node.render()
 
     def __str__(self):
         return self.__repr__()

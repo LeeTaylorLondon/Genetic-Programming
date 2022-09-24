@@ -1,7 +1,8 @@
-from typing import List, NoReturn, Tuple
-from Classes import NodeStructure
+from typing          import List, NoReturn, Tuple
+from Classes         import NodeStructure
+from NodeStrucGUI    import NodeStructureGUI
 from GlobalVariables import func_set, term_set, funcrepr
-from Consts import WHITE, BLACK, D_BLUE, create_text
+from Consts          import WHITE, BLACK, D_BLUE, create_text
 import pygame
 
 
@@ -14,24 +15,21 @@ class Window:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.run = True
         self.clock = pygame.time.Clock()
-        self.nss = [NodeStructure()] # nss = NodeStructure(s)
+        # Non-pygame attrs
+        self.ns = NodeStructureGUI(self.screen)
+        print(self.ns)
         # continuous loop
         self.render()
 
-    def draw_text(self, coords:List[Tuple[int, int]]) -> NoReturn:
-        for text_obj, xy_pair in zip(self.nst[0][0], coords):
-            self.screen.blit(text_obj, xy_pair)
-
-    def draw_centered_text(self, x, y, r=25.0):
-        pygame.draw.circle(self.screen, BLACK, (x, y), r)
-        txt = create_text('4', 48, WHITE)[0]
-        trect = txt.get_rect()
-        trect.center = (x, y)
-        self.screen.blit(txt, trect)
+    def debug_circleobjs(self):
+        for arr in self.ns.circle_objects:
+            for obj in arr:
+                print(obj.pygame_coords)
+        pass
 
     def render(self) -> NoReturn:
-        self.nss[0].set_node_depths()
-        self.nss[0].print_depth_hashmap()
+        self.ns.set_node_depths()
+        self.ns.print_depth_hashmap()
         while self.run:
             for event in pygame.event.get():
                 # Bind key to function(s)
@@ -41,13 +39,14 @@ class Window:
                     if event.key == pygame.K_t:
                         pass
                     if event.key == pygame.K_d:
-                        pass
+                        self.debug_circleobjs()
                     if event.key == pygame.K_c:
                         pass
             self.screen.fill(WHITE)
             # --[render start]--
 
-            self.draw_centered_text(40, 40)
+            self.ns.render()
+            # print(self.ns.circle_objects)
 
             # --[render end]--
             pygame.display.flip()
