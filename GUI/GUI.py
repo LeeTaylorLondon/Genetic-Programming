@@ -1,24 +1,11 @@
 from typing import List, NoReturn, Tuple
 from Classes import NodeStructure
 from GlobalVariables import func_set, term_set, funcrepr
+from Consts import WHITE, BLACK, D_BLUE, create_text
 import pygame
 
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-D_BLUE = (0, 32, 96)
 WIDTH, HEIGHT = 780, 450
-
-
-def create_text(arr, font_size) -> List[pygame.font.SysFont]:
-    rv = []
-    font = pygame.font.SysFont('chalkduster.tff', font_size)
-    if type(arr) == list:
-        for string in arr:
-            rv.append(font.render(string, True, BLACK))
-    elif type(arr) == str:
-        rv.append(font.render(arr, True, BLACK))
-    return rv
 
 
 class Window:
@@ -27,13 +14,6 @@ class Window:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.run = True
         self.clock = pygame.time.Clock()
-        # non pygame attrs
-        # self.text = create_text(["Input to Auto Encoder",
-        #                          "Auto Encoder Output",
-        #                          "[Key D: Pass Input to Auto Encoder]",
-        #                          "[Key T: Load Random Image]",
-        #                          "[Key C: Clear Input]"],
-        #                         16)
         self.nss = [NodeStructure()] # nss = NodeStructure(s)
         # continuous loop
         self.render()
@@ -41,6 +21,13 @@ class Window:
     def draw_text(self, coords:List[Tuple[int, int]]) -> NoReturn:
         for text_obj, xy_pair in zip(self.nst[0][0], coords):
             self.screen.blit(text_obj, xy_pair)
+
+    def draw_centered_text(self, x, y, r=25.0):
+        pygame.draw.circle(self.screen, BLACK, (x, y), r)
+        txt = create_text('4', 48, WHITE)[0]
+        trect = txt.get_rect()
+        trect.center = (x, y)
+        self.screen.blit(txt, trect)
 
     def render(self) -> NoReturn:
         self.nss[0].set_node_depths()
@@ -60,7 +47,7 @@ class Window:
             self.screen.fill(WHITE)
             # --[render start]--
 
-            self.screen.blit(create_text('Sample text', 48)[0], (0, 0))
+            self.draw_centered_text(40, 40)
 
             # --[render end]--
             pygame.display.flip()
