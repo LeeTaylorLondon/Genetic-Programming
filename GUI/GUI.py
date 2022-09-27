@@ -2,7 +2,7 @@ from typing          import List, NoReturn, Tuple
 from Classes         import NodeStructure
 from NodeStrucGUI    import NodeStructureGUI
 from GlobalVariables import func_set, term_set, funcrepr
-from Consts          import WHITE, BLACK, D_BLUE, create_text
+from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK
 import pygame
 
 
@@ -13,10 +13,10 @@ class Window:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.run = True
-        self.clock = pygame.time.Clock()
+        self.run    = True
+        self.clock  = pygame.time.Clock()
         # Non-pygame attrs
-        self.ns = NodeStructureGUI(self.screen)
+        self.ns     = NodeStructureGUI(self.screen)
         print(self.ns)
         # continuous loop
         self.render()
@@ -42,7 +42,7 @@ class Window:
                         self.debug_circleobjs()
                     if event.key == pygame.K_c:
                         pass
-            self.screen.fill(WHITE)
+            self.screen.fill(L1BLACK)
             # --[render start]--
 
             self.ns.render()
@@ -57,3 +57,5 @@ class Window:
 if __name__ == '__main__':
     global w
     w = Window()
+    r = w.ns.root
+

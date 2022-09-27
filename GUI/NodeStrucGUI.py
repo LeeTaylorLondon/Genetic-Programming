@@ -3,6 +3,7 @@ from Classes import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr
 from Consts import BLACK, WHITE, D_BLUE, create_text, create_text_str
 
+
 """
 Purpose: GUI version of NodeStructure, this class is used 
 to store and render from. This class inherits from NodeStructure 
@@ -24,6 +25,10 @@ Create relativity calculations. Possibly impose the whole NS-GUI
 class NodeGUI(Node):
     def __init__(self, node, screen):
         super(NodeGUI, self).__init__(val=node.val)
+        self.node          = node
+        self.l             = None
+        self.r             = None
+        self.p             = None
         self.screen        = screen
         self.pygame_val    = self.init_pygame_val()
         self.pygame_text   = create_text_str(self.pygame_val, 18, WHITE)
@@ -32,7 +37,8 @@ class NodeGUI(Node):
         self.pygame_radius = 32
 
     def init_pygame_val(self):
-        if type(self.val) != list and type(self.val) != int and type(self.val) != List:
+        # if type(self.val) != list and type(self.val) != int and type(self.val) != List:
+        if type(self.val) not in [List, list, int]:
             return funcrepr(self.val)
         else: return str(self.val)
 
@@ -41,9 +47,21 @@ class NodeGUI(Node):
 
     def render(self):
         """ A circle with it's value should be rendered """
-        pygame.draw.circle(self.screen, BLACK, self.pygame_coords, self.pygame_radius)
-        self.pygame_textr.center = (self.pygame_coords[0], self.pygame_coords[1])
+        sx, sy, sr = self.pygame_coords[0], self.pygame_coords[1], self.pygame_radius
+        # These lines draw a connecting line from a node to it's children
+        if type(self.l) == NodeGUI:
+            lx, ly = self.l.pygame_coords
+            pygame.draw.line(self.screen, BLACK, [sx, sy], [lx, ly], width=6)
+        if type(self.r) == NodeGUI:
+            rx, ry = self.r.pygame_coords
+            pygame.draw.line(self.screen, BLACK, [sx, sy], [rx, ry], width=6)
+        # Draw value
+        pygame.draw.circle(self.screen, BLACK, [sx, sy], sr)
+        self.pygame_textr.center = (sx, sy)
         self.screen.blit(self.pygame_text, self.pygame_textr)
+
+    def __str__(self):
+        return f"<NodeGUI {self.val}>"
 # ------ Class Definition End ------
 
 
@@ -53,12 +71,15 @@ class NodeStructureGUI(NodeStructure):
         super(NodeStructureGUI, self).__init__()
         self.screen         = screen
         self.circle_objects = self.init_circle_objects()
+        self.root           = self.circle_objects[0][0] # NodeGUI
+        # self.init_left_right()
+        self.init_lrp()
 
     def init_circle_objects(self):
-        render_matrix, x, y = [], 0, 0
+        render_matrix, y = [], 0
         for arr in self.depth_hashmap.values():
             y += 75
-            i_arr = []
+            x, i_arr = 0, []
             for node in arr:
                 x += 75
                 n_gui_obj = NodeGUI(node, self.screen)
@@ -66,6 +87,21 @@ class NodeStructureGUI(NodeStructure):
                 i_arr.append(n_gui_obj)
             render_matrix.append(i_arr)
         return render_matrix
+
+    def init_lrp(self):
+        """ Selects 'one' then assigns l,r by selecting below 'two' """
+        cn = self.root
+        for ai,arr in enumerate(self.circle_objects):
+            bc = 0
+            for ni,node in enumerate(arr):
+                cn = self.circle_objects[ai][ni]
+                if node.type == 'func':
+                    try: cn.l = self.circle_objects[ai+1][bc]
+                    except IndexError as e: pass
+                    try: cn.r = self.circle_objects[ai+1][bc+1]
+                    except IndexError as e: pass
+                    bc += 2
+        pass
 
     def render(self):
         for array in self.circle_objects:

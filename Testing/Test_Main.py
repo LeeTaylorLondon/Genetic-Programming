@@ -40,30 +40,39 @@ Results:
 # print(something, type(something))
 
 ''' Testing Genetic Program 'runs' # of times '''
-bug_counter = [0]
-runs = 4_000
-for _ in range(runs):
-    # print(f'RUN_i: >>> {_} <<<')
-    gp   = GeneticProgram()
-    sarr = gp.selection(bug_counter)
-    gp.crossover(sarr)
-    if _ != runs - 1: del gp, sarr
-    # print('PASSED: S1-S2-S3\n')
-print(f'Bug counter: {bug_counter} out of [{runs * 4}]')
-print (str(runs) + " runs complete!")
+# bug_counter = [0]
+# runs = 4_000
+# for _ in range(runs):
+#     # print(f'RUN_i: >>> {_} <<<')
+#     gp   = GeneticProgram()
+#     sarr = gp.selection(bug_counter)
+#     gp.crossover(sarr)
+#     if _ != runs - 1: del gp, sarr
+#     # print('PASSED: S1-S2-S3\n')
+# print(f'Bug counter: {bug_counter} out of [{runs * 4}]')
+# print (str(runs) + " runs complete!")
 
 ''' TEST: What does GlobalVariables.obj_func() return? '''
-obj_func_rv = obj_func(None, out=False)
+# obj_func_rv = obj_func(None, out=False)
 
 ''' TEST: None - is a function '''
-def outf(arr=None, out=False):
-    """ Print fitness for each population member
-    of passed list 'arr'. """
-    if arr is None:
-        pass
-        # arr = strucs
-    rv = "|"
-    for struc in arr: rv = rv + str(round(measure_fitness(struc), 3)) + "|"
-    if out: print(rv)
-    return rv
+# def outf(arr=None, out=False):
+#     """ Print fitness for each population member
+#     of passed list 'arr'. """
+#     if arr is None:
+#         pass
+#         # arr = strucs
+#     rv = "|"
+#     for struc in arr: rv = rv + str(round(measure_fitness(struc), 3)) + "|"
+#     if out: print(rv)
+#     return rv
 
+arr = [x for x in range(5)]
+print(arr)
+for elm in arr[:-1]:
+    print(elm)
+
+arr = [x for x in range(5)]
+print(arr)
+for elm in arr[::2]:
+    print(elm)

@@ -2,6 +2,7 @@ import pygame
 from typing import List
 
 WHITE = (255, 255, 255)
+L1BLACK = (25, 25, 25)
 BLACK = (0, 0, 0)
 D_BLUE = (0, 32, 96)
 WIDTH, HEIGHT = 780, 450
