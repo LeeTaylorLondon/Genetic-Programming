@@ -16,7 +16,7 @@ class NodeGUI(Node):
         self.pygame_text   = create_text_str(self.pygame_val, 18, WHITE)
         self.pygame_textr  = self.pygame_text.get_rect()
         self.pygame_radius = 18
-        self.pygame_coords = [0, 45] # x,y
+        self.pygame_coords = [0, int(self.pygame_radius)] # x,y
         self.pygame_lwidth = 3 # 'line'-width (must be int)
 
     def init_pygame_val(self):

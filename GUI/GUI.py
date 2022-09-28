@@ -6,7 +6,7 @@ from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK
 import pygame
 
 
-WIDTH, HEIGHT = 780, 450
+WIDTH, HEIGHT = 1010, 450
 
 
 class Window:
@@ -17,8 +17,9 @@ class Window:
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
         # self.ns      = NodeStructureGUI(self.screen)
-        self.ns      = [NodeStructureGUI(self.screen) for _ in range(2)]
-        self.nsspace = 10
+        self.ns      = [NodeStructureGUI(self.screen) for _ in range(3)]
+        self.nsspace = 25
+        self.overlap = 0
         self.init_ns() # Prevents overlapping NoStrucs
         # continuous loop
         self.render()
@@ -26,22 +27,25 @@ class Window:
     def init_ns(self):
         """ This method prevents NodeStrucGUIs from overlapping
          by applying an offset to each NSGUI object. """
-        if type(self.ns) != list: return False
-        for nsi,ns in enumerate(self.ns[:-1]):
+        if type(self.ns) != list:
+            return False
+        for nsi,ns in enumerate(self.ns[:-1]): # Do all but last one
             ns.set_node_depths()
             # Locate longest list in matrix of node-objects
             longest_len_i, longest_len_val = -1, -1
             for i,arr in enumerate(ns.circle_objects):
-                if len(arr) > longest_len_val: longest_len_i, longest_len_val = i, len(arr)
+                if len(arr) > longest_len_val:
+                    longest_len_i, longest_len_val = i, len(arr)
             # Width_of_Nstruc = (2*Radius) + Spacing(#Nodes - 1) + Padding
             warr    = ns.circle_objects[longest_len_i]              # Widest array
             l, r, s = len(warr), warr[0].pygame_radius, ns.spacingx # Radius, Node-Spacing
             spacing = (2 * r) + (s * (l - 1)) + self.nsspace
+            self.overlap += spacing
             # Apply spacing -> to the next one
             for arr in self.ns[nsi+1].circle_objects:
                 for nodegui in arr:
                     x, y = nodegui.pygame_coords
-                    nodegui.set_pygame_coords(x+spacing, y)
+                    nodegui.set_pygame_coords(x+self.overlap, y)
         pass
 
     def debug_circleobjs(self):
