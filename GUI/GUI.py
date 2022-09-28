@@ -16,10 +16,33 @@ class Window:
         self.run    = True
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
-        self.ns     = NodeStructureGUI(self.screen)
-        print(self.ns)
+        # self.ns      = NodeStructureGUI(self.screen)
+        self.ns      = [NodeStructureGUI(self.screen) for _ in range(2)]
+        self.nsspace = 10
+        self.init_ns() # Prevents overlapping NoStrucs
         # continuous loop
         self.render()
+
+    def init_ns(self):
+        """ This method prevents NodeStrucGUIs from overlapping
+         by applying an offset to each NSGUI object. """
+        if type(self.ns) != list: return False
+        for nsi,ns in enumerate(self.ns[:-1]):
+            ns.set_node_depths()
+            # Locate longest list in matrix of node-objects
+            longest_len_i, longest_len_val = -1, -1
+            for i,arr in enumerate(ns.circle_objects):
+                if len(arr) > longest_len_val: longest_len_i, longest_len_val = i, len(arr)
+            # Width_of_Nstruc = (2*Radius) + Spacing(#Nodes - 1) + Padding
+            warr    = ns.circle_objects[longest_len_i]              # Widest array
+            l, r, s = len(warr), warr[0].pygame_radius, ns.spacingx # Radius, Node-Spacing
+            spacing = (2 * r) + (s * (l - 1)) + self.nsspace
+            # Apply spacing -> to the next one
+            for arr in self.ns[nsi+1].circle_objects:
+                for nodegui in arr:
+                    x, y = nodegui.pygame_coords
+                    nodegui.set_pygame_coords(x+spacing, y)
+        pass
 
     def debug_circleobjs(self):
         for arr in self.ns.circle_objects:
@@ -28,8 +51,9 @@ class Window:
         pass
 
     def render(self) -> NoReturn:
-        self.ns.set_node_depths()
-        self.ns.print_depth_hashmap()
+        # self.ns.set_node_depths()
+        # self.ns.print_depth_hashmap()
+        print(len(self.ns))
         while self.run:
             for event in pygame.event.get():
                 # Bind key to function(s)
@@ -45,7 +69,9 @@ class Window:
             self.screen.fill(L1BLACK)
             # --[render start]--
 
-            self.ns.render()
+            # self.ns.render()
+            for ns in self.ns:
+                ns.render()
             # print(self.ns.circle_objects)
 
             # --[render end]--
@@ -57,5 +83,5 @@ class Window:
 if __name__ == '__main__':
     global w
     w = Window()
-    r = w.ns.root
+    # r = w.ns.root
 

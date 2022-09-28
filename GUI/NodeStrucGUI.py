@@ -2,6 +2,7 @@ import pygame.draw
 from Classes import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr
 from Consts import BLACK, WHITE, D_BLUE, create_text, create_text_str
+from NodeGUI import NodeGUI
 
 
 """
@@ -22,66 +23,25 @@ Create relativity calculations. Possibly impose the whole NS-GUI
 
 
 # ------ Class Definition Start ------
-class NodeGUI(Node):
-    def __init__(self, node, screen):
-        super(NodeGUI, self).__init__(val=node.val)
-        self.node          = node
-        self.l             = None
-        self.r             = None
-        self.p             = None
-        self.screen        = screen
-        self.pygame_val    = self.init_pygame_val()
-        self.pygame_text   = create_text_str(self.pygame_val, 18, WHITE)
-        self.pygame_textr  = self.pygame_text.get_rect()
-        self.pygame_coords = [0, 0] # x,y
-        self.pygame_radius = 32
-
-    def init_pygame_val(self):
-        # if type(self.val) != list and type(self.val) != int and type(self.val) != List:
-        if type(self.val) not in [List, list, int]:
-            return funcrepr(self.val)
-        else: return str(self.val)
-
-    def set_pygame_coords(self, x, y):
-        self.pygame_coords[0], self.pygame_coords[1] = x, y
-
-    def render(self):
-        """ A circle with it's value should be rendered """
-        sx, sy, sr = self.pygame_coords[0], self.pygame_coords[1], self.pygame_radius
-        # These lines draw a connecting line from a node to it's children
-        if type(self.l) == NodeGUI:
-            lx, ly = self.l.pygame_coords
-            pygame.draw.line(self.screen, BLACK, [sx, sy], [lx, ly], width=6)
-        if type(self.r) == NodeGUI:
-            rx, ry = self.r.pygame_coords
-            pygame.draw.line(self.screen, BLACK, [sx, sy], [rx, ry], width=6)
-        # Draw value
-        pygame.draw.circle(self.screen, BLACK, [sx, sy], sr)
-        self.pygame_textr.center = (sx, sy)
-        self.screen.blit(self.pygame_text, self.pygame_textr)
-
-    def __str__(self):
-        return f"<NodeGUI {self.val}>"
-# ------ Class Definition End ------
-
-
-# ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
     def __init__(self, screen):
         super(NodeStructureGUI, self).__init__()
         self.screen         = screen
+        self.spacingx       = 45
+        self.spacingy       = 45
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
-        # self.init_left_right()
         self.init_lrp()
 
     def init_circle_objects(self):
+        """ Returns a matrix storing arrays which store NodeGUI-obj's
+         also sets the x,y for each object to be rendered at. """
         render_matrix, y = [], 0
         for arr in self.depth_hashmap.values():
-            y += 75
+            y += self.spacingy
             x, i_arr = 0, []
             for node in arr:
-                x += 75
+                x += self.spacingx
                 n_gui_obj = NodeGUI(node, self.screen)
                 n_gui_obj.set_pygame_coords(x, y)
                 i_arr.append(n_gui_obj)
@@ -89,7 +49,10 @@ class NodeStructureGUI(NodeStructure):
         return render_matrix
 
     def init_lrp(self):
-        """ Selects 'one' then assigns l,r by selecting below 'two' """
+        """ Initialises self.l, self.r, and self.p (left, right, parent)
+        this is used for rendering purposes to render 'lined' links between
+        parents and children.
+        Selects 'one' then assigns l,r by selecting below 'two'. """
         cn = self.root
         for ai,arr in enumerate(self.circle_objects):
             bc = 0
@@ -104,6 +67,8 @@ class NodeStructureGUI(NodeStructure):
         pass
 
     def render(self):
+        """ For each array storing a list of NodeGUI objects
+         it calls their render method. """
         for array in self.circle_objects:
             for node in array:
                 node.render()
