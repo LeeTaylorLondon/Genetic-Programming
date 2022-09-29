@@ -2,7 +2,7 @@ from typing          import List, NoReturn, Tuple
 from Classes         import NodeStructure
 from NodeStrucGUI    import NodeStructureGUI
 from GlobalVariables import func_set, term_set, funcrepr
-from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK
+from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK, RED
 import pygame
 
 
@@ -49,6 +49,15 @@ class Window:
                 print(obj.pygame_coords)
         pass
 
+    def change_nscolor(self, i=0, new_color=RED):
+        self.ns[i].color = new_color
+        self.ns[i].pygame_fitness = self.ns[i].init_pygame_fitness()
+        for arr in self.ns[i].circle_objects:
+            for nod in arr:
+                nod.color = new_color
+                nod.pygame_lcolor = new_color
+                nod.pygame_text = nod.init_pygame_text()
+
     def render(self) -> NoReturn:
         # self.ns.set_node_depths()
         # self.ns.print_depth_hashmap()
@@ -63,7 +72,7 @@ class Window:
                     if event.key == pygame.K_d:
                         self.debug_circleobjs()
                     if event.key == pygame.K_c:
-                        pass
+                        self.change_nscolor()
             self.screen.fill(L1BLACK)
             # --[render start]--
 

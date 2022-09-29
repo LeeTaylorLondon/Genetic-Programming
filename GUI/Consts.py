@@ -6,6 +6,8 @@ L1BLACK = (25, 25, 25)
 BLACK = (0, 0, 0)
 D_BLUE = (0, 32, 96)
 DRED = (125, 0, 0)
+CGREEN = (0, 145, 0)
+RED = (145, 0, 0)
 WIDTH, HEIGHT = 780, 450
 
 def create_text(arr, font_size, color=BLACK) -> List[pygame.font.SysFont]:

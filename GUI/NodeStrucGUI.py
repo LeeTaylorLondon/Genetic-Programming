@@ -1,6 +1,6 @@
 from Classes         import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr, len_
-from Consts          import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str
+from Consts          import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str, CGREEN, RED
 from NodeGUI         import NodeGUI
 import pygame.draw
 
@@ -29,6 +29,7 @@ class NodeStructureGUI(NodeStructure):
         self.spacingx       = 45
         self.spacingy       = 45
         self.pad            = 10
+        self.color          = CGREEN
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
         self.pixel_width    = self.calc_pixel_width()
@@ -59,7 +60,7 @@ class NodeStructureGUI(NodeStructure):
 
     def init_pygame_fitness(self):
         f = "F: " + str(round(measure_fitness(self, True), 2))
-        x, y, s = self.hitbox[0], self.pixel_height, create_text_str(f, 22, (0, 125, 0))
+        x, y, s = self.hitbox[0], self.pixel_height, create_text_str(f, 22, self.color)
         return [x, y, s] # x:int, y:int, s:pygame.text
 
     def init_circle_objects(self):
@@ -122,14 +123,14 @@ class NodeStructureGUI(NodeStructure):
         self.render_fitness()
 
     def render_botbox(self):
-        pygame.draw.rect(self.screen, (0, 125, 0), self.botbox, width=1)
+        pygame.draw.rect(self.screen, self.color, self.botbox, width=1)
 
     def render_fitness(self):
         s = self.pygame_fitness[2]
         self.screen.blit(s, (self.botbox[0] + self.pad, self.botbox[1] + (self.pad / 2)))
 
     def render_hitbox(self):
-        pygame.draw.rect(self.screen, (0, 125, 0), self.hitbox, width=1)
+        pygame.draw.rect(self.screen, self.color, self.hitbox, width=1)
 
     def __str__(self):
         return self.__repr__()
