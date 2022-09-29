@@ -58,7 +58,7 @@ class NodeStructureGUI(NodeStructure):
         return spacing
 
     def init_pygame_fitness(self):
-        f = str(round(measure_fitness(self, True), 2))
+        f = "F: " + str(round(measure_fitness(self, True), 2))
         x, y, s = self.hitbox[0], self.pixel_height, create_text_str(f, 22, (0, 125, 0))
         return [x, y, s] # x:int, y:int, s:pygame.text
 
@@ -108,8 +108,8 @@ class NodeStructureGUI(NodeStructure):
         x = self.root.pygame_coords[0] - r - self.pad
         y = self.calc_pixel_height() + self.root.pygame_coords[1] + self.pad - r
         w = self.calc_pixel_width() + (2 * self.pad)
-        h = 35
-        return [x, y, w, h] # x, y, w, h
+        h = 25
+        return [x, y - 1, w, h] # x, y, w, h
 
     def render(self):
         """ For each array storing a list of NodeGUI objects
@@ -122,12 +122,11 @@ class NodeStructureGUI(NodeStructure):
         self.render_fitness()
 
     def render_botbox(self):
-        pygame.draw.rect(self.screen, BLACK, self.botbox)
+        pygame.draw.rect(self.screen, (0, 125, 0), self.botbox, width=1)
 
     def render_fitness(self):
         s = self.pygame_fitness[2]
-        self.screen.blit(s, (self.botbox[0], self.botbox[1]))
-        pass
+        self.screen.blit(s, (self.botbox[0] + self.pad, self.botbox[1] + (self.pad / 2)))
 
     def render_hitbox(self):
         pygame.draw.rect(self.screen, (0, 125, 0), self.hitbox, width=1)
