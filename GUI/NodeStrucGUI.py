@@ -1,7 +1,7 @@
 import pygame.draw
 from Classes import NodeStructure, Node, List
-from GlobalVariables import measure_fitness, funcrepr
-from Consts import BLACK, WHITE, D_BLUE, create_text, create_text_str
+from GlobalVariables import measure_fitness, funcrepr, len_
+from Consts import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str
 from NodeGUI import NodeGUI
 
 
@@ -31,7 +31,29 @@ class NodeStructureGUI(NodeStructure):
         self.spacingy       = 45
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
+        self.pixel_width    = self.calc_pixel_width()
+        self.pixel_height   = self.calc_pixel_height()
+        self.hitbox         = self.init_hitbox() # Rect = [x, y, w, h]
+        # self.init_hitbox()
         self.init_lrp()
+
+    def calc_pixel_width(self):
+        """ Calculates and returns the pixel width
+        WITHOUT padding width of the NodeStructure """
+        longest_len_i, longest_len_val = -1, -1
+        for i, arr in enumerate(self.circle_objects):
+            if len(arr) > longest_len_val:
+                longest_len_i, longest_len_val = i, len(arr)
+        # Width_of_Nstruc = (2*Radius) + Spacing(#Nodes - 1) + Padding
+        warr = self.circle_objects[longest_len_i]  # 'w'arr = 'widest' array
+        l, r, s = len(warr), warr[0].pygame_radius, self.spacingx  # Radius, Node-Spacing
+        spacing = (2 * r) + (s * (l - 1))
+        return spacing
+
+    def calc_pixel_height(self):
+        l, r, s = len_(self.circle_objects), self.root.pygame_radius, self.spacingy
+        spacing = (2 * r) + (s * (l - 1))
+        return spacing
 
     def init_circle_objects(self):
         """ Returns a matrix storing arrays which store NodeGUI-obj's
@@ -66,12 +88,23 @@ class NodeStructureGUI(NodeStructure):
                     bc += 2
         pass
 
+    def init_hitbox(self):
+        x, y = self.root.pygame_coords
+        r    = self.root.pygame_radius
+        pad  = 10
+        hitbox = [x - r - pad, y - r - pad, self.pixel_width + (2 * pad), self.pixel_height + (2 * pad)]
+        return hitbox
+
     def render(self):
         """ For each array storing a list of NodeGUI objects
          it calls their render method. """
         for array in self.circle_objects:
             for node in array:
                 node.render()
+        self.render_hitbox()
+
+    def render_hitbox(self):
+        pygame.draw.rect(self.screen, DRED, self.hitbox, width=1)
 
     def __str__(self):
         return self.__repr__()

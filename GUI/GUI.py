@@ -6,7 +6,7 @@ from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK
 import pygame
 
 
-WIDTH, HEIGHT = 1010, 450
+WIDTH, HEIGHT = 1450, 452
 
 
 class Window:
@@ -17,7 +17,7 @@ class Window:
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
         # self.ns      = NodeStructureGUI(self.screen)
-        self.ns      = [NodeStructureGUI(self.screen) for _ in range(3)]
+        self.ns      = [NodeStructureGUI(self.screen) for _ in range(7)]
         self.nsspace = 25
         self.overlap = 0
         self.init_ns() # Prevents overlapping NoStrucs
@@ -31,16 +31,9 @@ class Window:
             return False
         for nsi,ns in enumerate(self.ns[:-1]): # Do all but last one
             ns.set_node_depths()
-            # Locate longest list in matrix of node-objects
-            longest_len_i, longest_len_val = -1, -1
-            for i,arr in enumerate(ns.circle_objects):
-                if len(arr) > longest_len_val:
-                    longest_len_i, longest_len_val = i, len(arr)
-            # Width_of_Nstruc = (2*Radius) + Spacing(#Nodes - 1) + Padding
-            warr    = ns.circle_objects[longest_len_i]              # Widest array
-            l, r, s = len(warr), warr[0].pygame_radius, ns.spacingx # Radius, Node-Spacing
-            spacing = (2 * r) + (s * (l - 1)) + self.nsspace
+            spacing = ns.pixel_width + self.nsspace
             self.overlap += spacing
+            self.ns[nsi+1].hitbox[0] += self.overlap
             # Apply spacing -> to the next one
             for arr in self.ns[nsi+1].circle_objects:
                 for nodegui in arr:
@@ -57,7 +50,6 @@ class Window:
     def render(self) -> NoReturn:
         # self.ns.set_node_depths()
         # self.ns.print_depth_hashmap()
-        print(len(self.ns))
         while self.run:
             for event in pygame.event.get():
                 # Bind key to function(s)
@@ -73,10 +65,9 @@ class Window:
             self.screen.fill(L1BLACK)
             # --[render start]--
 
-            # self.ns.render()
+            """ Render each NodeStructure """
             for ns in self.ns:
                 ns.render()
-            # print(self.ns.circle_objects)
 
             # --[render end]--
             pygame.display.flip()

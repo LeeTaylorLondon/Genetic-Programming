@@ -29,6 +29,15 @@ def funcrepr(func):
     # todo: test
     return str(func).split()[1]
 
+def len_(object):
+    """ Attr -> NodeStructureGUI.circle_objects may contain empty vectors
+    leading to an incorrect 'len' count using the default function. """
+    count = 0
+    for x in object:
+        if len(x) > 0:
+            count += 1
+    return count
+
 def obj_func(x, out=True):
     """ Objective behaviour as a function """
     if x is None: x = [float(x)/10 for x in range(-10, 11, 1)]
