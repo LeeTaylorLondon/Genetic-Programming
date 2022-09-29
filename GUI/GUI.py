@@ -20,7 +20,7 @@ class Window:
         self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
         self.nsspace = 25
         self.overlap = 0
-        self.init_ns() # Prevents overlapping NoStrucs
+        self.init_ns() # Prevents overlapping GUI elements
         # continuous loop
         self.render()
 
@@ -33,6 +33,7 @@ class Window:
             ns.set_node_depths()
             spacing = ns.pixel_width + self.nsspace
             self.overlap += spacing
+            # Increase 'X' values
             self.ns[nsi+1].hitbox[0] += self.overlap
             self.ns[nsi+1].pygame_fitness[0] += self.overlap
             self.ns[nsi+1].botbox[0] += self.overlap
@@ -50,8 +51,10 @@ class Window:
         pass
 
     def change_nscolor(self, i=0, new_color=RED, old_color=CGREEN):
+        # If statement allows for alternating back to original/another color
         if self.ns[i].color == new_color:
             new_color = old_color
+        # Re-assign color and regenerate some objects
         self.ns[i].color = new_color
         self.ns[i].pygame_fitness = self.ns[i].init_pygame_fitness()
         for arr in self.ns[i].circle_objects:
