@@ -1,7 +1,7 @@
-import pygame.draw
-from Classes import NodeStructure, Node, List
+from Classes         import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr
-from Consts import BLACK, WHITE, D_BLUE, create_text, create_text_str
+from Consts          import BLACK, WHITE, D_BLUE, create_text, create_text_str
+import pygame.draw
 
 # ------ Class Definition Start ------
 class NodeGUI(Node):
@@ -13,16 +13,18 @@ class NodeGUI(Node):
         self.p             = None
         self.screen        = screen
         self.pygame_val    = self.init_pygame_val()
-        self.pygame_text   = create_text_str(self.pygame_val, 18, WHITE)
+        self.pygame_text   = create_text_str(self.pygame_val, 22, (0, 125, 0))
         self.pygame_textr  = self.pygame_text.get_rect()
         self.pygame_radius = 18
         self.pygame_coords = [0, int(self.pygame_radius)] # x,y
         self.pygame_lwidth = 3 # 'line'-width (must be int)
+        self.pygame_lcolor = (0, 125, 0)
+        self.pygame_ncolor = BLACK
 
     def init_pygame_val(self):
         # if type(self.val) != list and type(self.val) != int and type(self.val) != List:
         if type(self.val) not in [List, list, int]:
-            return funcrepr(self.val)
+            return str.upper(funcrepr(self.val))
         else: return str(self.val)
 
     def set_pygame_coords(self, x, y):
@@ -36,12 +38,12 @@ class NodeGUI(Node):
         # These lines draw a connecting line from a node to it's children
         if type(self.l) == NodeGUI:
             lx, ly = self.l.pygame_coords
-            pygame.draw.line(self.screen, BLACK, [sx, sy], [lx, ly], width=self.pygame_lwidth)
+            pygame.draw.line(self.screen, self.pygame_lcolor, [sx, sy], [lx, ly], width=self.pygame_lwidth)
         if type(self.r) == NodeGUI:
             rx, ry = self.r.pygame_coords
-            pygame.draw.line(self.screen, BLACK, [sx, sy], [rx, ry], width=self.pygame_lwidth)
+            pygame.draw.line(self.screen, self.pygame_lcolor, [sx, sy], [rx, ry], width=self.pygame_lwidth)
         # Draw value
-        pygame.draw.circle(self.screen, BLACK, [sx, sy], sr)
+        pygame.draw.circle(self.screen, self.pygame_ncolor, [sx, sy], sr)
         self.pygame_textr.center = (sx, sy)
         self.screen.blit(self.pygame_text, self.pygame_textr)
 

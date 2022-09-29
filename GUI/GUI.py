@@ -6,18 +6,18 @@ from Consts          import WHITE, BLACK, D_BLUE, create_text, L1BLACK
 import pygame
 
 
-WIDTH, HEIGHT = 1450, 452
+WIDTH, HEIGHT = 897, 452
 
 
 class Window:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         self.run    = True
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
         # self.ns      = NodeStructureGUI(self.screen)
-        self.ns      = [NodeStructureGUI(self.screen) for _ in range(7)]
+        self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
         self.nsspace = 25
         self.overlap = 0
         self.init_ns() # Prevents overlapping NoStrucs
@@ -34,6 +34,8 @@ class Window:
             spacing = ns.pixel_width + self.nsspace
             self.overlap += spacing
             self.ns[nsi+1].hitbox[0] += self.overlap
+            self.ns[nsi+1].pygame_fitness[0] += self.overlap
+            self.ns[nsi+1].botbox[0] += self.overlap
             # Apply spacing -> to the next one
             for arr in self.ns[nsi+1].circle_objects:
                 for nodegui in arr:

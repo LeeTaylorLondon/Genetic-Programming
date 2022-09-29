@@ -1,9 +1,8 @@
-import pygame.draw
-from Classes import NodeStructure, Node, List
+from Classes         import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr, len_
-from Consts import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str
-from NodeGUI import NodeGUI
-
+from Consts          import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str
+from NodeGUI         import NodeGUI
+import pygame.draw
 
 """
 Purpose: GUI version of NodeStructure, this class is used 
@@ -24,16 +23,19 @@ Create relativity calculations. Possibly impose the whole NS-GUI
 
 # ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
-    def __init__(self, screen):
+    def __init__(self, screen, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
         super(NodeStructureGUI, self).__init__()
         self.screen         = screen
         self.spacingx       = 45
         self.spacingy       = 45
+        self.pad            = 10
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
         self.pixel_width    = self.calc_pixel_width()
         self.pixel_height   = self.calc_pixel_height()
         self.hitbox         = self.init_hitbox() # Rect = [x, y, w, h]
+        self.botbox         = self.init_botbox()
+        self.pygame_fitness = self.init_pygame_fitness()
         # self.init_hitbox()
         self.init_lrp()
 
@@ -54,6 +56,11 @@ class NodeStructureGUI(NodeStructure):
         l, r, s = len_(self.circle_objects), self.root.pygame_radius, self.spacingy
         spacing = (2 * r) + (s * (l - 1))
         return spacing
+
+    def init_pygame_fitness(self):
+        f = str(round(measure_fitness(self, True), 2))
+        x, y, s = self.hitbox[0], self.pixel_height, create_text_str(f, 22, (0, 125, 0))
+        return [x, y, s] # x:int, y:int, s:pygame.text
 
     def init_circle_objects(self):
         """ Returns a matrix storing arrays which store NodeGUI-obj's
@@ -91,9 +98,18 @@ class NodeStructureGUI(NodeStructure):
     def init_hitbox(self):
         x, y = self.root.pygame_coords
         r    = self.root.pygame_radius
-        pad  = 10
-        hitbox = [x - r - pad, y - r - pad, self.pixel_width + (2 * pad), self.pixel_height + (2 * pad)]
+        hitbox = [x - r - self.pad, y - r - self.pad,
+                  self.pixel_width + (2 * self.pad),
+                  self.pixel_height + (2 * self.pad)]
         return hitbox
+
+    def init_botbox(self):
+        r = self.root.pygame_radius
+        x = self.root.pygame_coords[0] - r - self.pad
+        y = self.calc_pixel_height() + self.root.pygame_coords[1] + self.pad - r
+        w = self.calc_pixel_width() + (2 * self.pad)
+        h = 35
+        return [x, y, w, h] # x, y, w, h
 
     def render(self):
         """ For each array storing a list of NodeGUI objects
@@ -102,9 +118,19 @@ class NodeStructureGUI(NodeStructure):
             for node in array:
                 node.render()
         self.render_hitbox()
+        self.render_botbox()
+        self.render_fitness()
+
+    def render_botbox(self):
+        pygame.draw.rect(self.screen, BLACK, self.botbox)
+
+    def render_fitness(self):
+        s = self.pygame_fitness[2]
+        self.screen.blit(s, (self.botbox[0], self.botbox[1]))
+        pass
 
     def render_hitbox(self):
-        pygame.draw.rect(self.screen, DRED, self.hitbox, width=1)
+        pygame.draw.rect(self.screen, (0, 125, 0), self.hitbox, width=1)
 
     def __str__(self):
         return self.__repr__()
