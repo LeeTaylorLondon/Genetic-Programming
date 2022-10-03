@@ -29,6 +29,7 @@ class NodeStructureGUI(NodeStructure):
         self.spacingx       = 45
         self.spacingy       = 45
         self.pad            = 10
+        self.botboxh        = 25
         self.color          = CGREEN
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
@@ -39,6 +40,14 @@ class NodeStructureGUI(NodeStructure):
         self.pygame_fitness = self.init_pygame_fitness()
         # self.init_hitbox()
         self.init_lrp()
+
+    def apply_y_offset(self, y_offset):
+        """ This allows the user to scroll down """
+        for arr in self.circle_objects:
+            for node in arr:
+                node.pygame_coords[1] = node.pygame_coords[1] + y_offset
+        self.hitbox[1] += y_offset
+        self.botbox[1] += y_offset
 
     def calc_pixel_width(self):
         """ Calculates and returns the pixel width
@@ -54,8 +63,8 @@ class NodeStructureGUI(NodeStructure):
         return spacing
 
     def calc_pixel_height(self):
-        l, r, s = len_(self.circle_objects), self.root.pygame_radius, self.spacingy
-        spacing = (2 * r) + (s * (l - 1))
+        l, r, s, bbh = len_(self.circle_objects), self.root.pygame_radius, self.spacingy, self.botboxh
+        spacing = (2 * r) + (s * (l - 1)) + abs(bbh)
         return spacing
 
     def init_pygame_fitness(self):
@@ -109,7 +118,7 @@ class NodeStructureGUI(NodeStructure):
         x = self.root.pygame_coords[0] - r - self.pad
         y = self.calc_pixel_height() + self.root.pygame_coords[1] + self.pad - r
         w = self.calc_pixel_width() + (2 * self.pad)
-        h = 25
+        h = self.botboxh
         return [x, y - 1, w, h] # x, y, w, h
 
     def render(self):

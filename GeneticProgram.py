@@ -47,7 +47,7 @@ class GeneticProgram:
             self.pm[0][replace_i] = NodeStructure()
             print(self.population)
 
-    def selection(self, debug_counter, out=False):
+    def selection(self, debug_counter=0, out=False):
         """ Creates values fitness, proportions, and rolling percentages
         to select (in a roulette fashion) two random NodeStructures from
         the self.population.
@@ -93,8 +93,10 @@ class GeneticProgram:
             if rf2 < matrix[0][3]: s2 = 0
             # if rfx within boundary and current selection is None
             for i,vec in enumerate(matrix):
+                print(round(matrix[i][3], 2))
                 if matrix[i][3] < rf1 <= matrix[i+1][3] and s1 is None: s1 = i + 1
                 if matrix[i][3] < rf2 <= matrix[i+1][3] and s2 is None: s2 = i + 1
+            print("")
             if s1 is None: rf1, s1 = rf(), None
             if s2 is None: rf2, s2 = rf(), None
             # Todo: optional - prevent selecting itself - enters infinite loop

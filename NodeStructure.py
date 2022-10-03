@@ -281,7 +281,7 @@ class NodeStructure:
 
     def __copy__(self):
         rootc, og   = self.root.__copy__()
-        q, qnext = [], []
+        q, qnext    = [], []
         # Queue the originals (not copies to check for children)
         # ... and to copy from
         rootc.left  = og.left.__copy__(q)

@@ -1,4 +1,4 @@
-# Genetic-Programming
+# Genetic-Programming Concept
 
 A short explaination of genetic programming:  
 You are tasked with improving the design of an electrical circuit board. To achieve this you modify the existing design by adding, 
