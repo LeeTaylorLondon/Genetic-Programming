@@ -79,7 +79,7 @@ class Window:
         pass
 
     def change_nscolor(self, i=0, v=0, new_color=RED, old_color=CGREEN):
-        if type(i) == list:
+        if type(i) in [list, tuple]:
             for x in i:
                 self.change_nscolor(x, new_color=new_color)
             return
@@ -150,19 +150,10 @@ class Window:
                         for obj in self.ns: obj.print_depth_hashmap()
                     if event.key == pygame.K_c:
                         # self.change_nscolor()
-                        sarr = self.gp.selection()
+                        sarr = self.gp.selection(), self.gp.selection()
                         cons = self.gp.crossover(sarr, debug=False)
-                        # DEBUG DEBUG DEBUG DEBUG
-                        for _ in self.ns:
-                            print(f"_ = {_}")
-                        print()
+                        self.change_nscolor(sarr, v=0)
                         self.add_nodestruc(NodeStructureGUI(self.screen, [cons]), v=1)
-                        # self.ns[1].append(NodeStructureGUI(self.screen, [cons]))
-                        # self.init_nss()
-                        # DEBUG DEBUG DEBUG DEBUG
-                        for _ in self.ns:
-                            print(f"_ = {_}")
-                        print()
             self.screen.fill(L1BLACK)
             self.apply_scrolling()
             # --[render start]--

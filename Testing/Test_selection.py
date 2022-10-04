@@ -1,3 +1,5 @@
+# Author: Lee Taylor
+
 """          20 + 5 + 10 + 5 = 40
              100 / 40 = 2.5 
 Therefore -> 1 : 2.5% 

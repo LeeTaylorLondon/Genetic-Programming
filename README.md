@@ -11,6 +11,26 @@ until the target efficiency is met or the design can no longer be improved by th
 This process is a brief example of genetic programming. 
 
 ## Project Brief
+#### Node Class
+Each node stores a value and might have two children and a parent Node
+* Contains pointer to left and right child
+* Contains pointer to parent
+* Contains value - either a function or integer
+#### NodeStructure Class
+There are rules for the way a structure of Nodes is formed in order to represent a formuale
+* Generate random node function
+* Generates a tree of correctly linked Nodes
+* Interpreter evaluates the formulae
+#### GeneticProgram Class
+This is both a container for NodeStructures and where genetic functions are applied to reach a goal
+* Stores a list of NodeStructures as a population
+* Performs genetic functions crossover, mutation, duplication
+* Performs genetic functions until goal is reached
+#### GUI Class
+This renders the contents of the program for useability and debugging purposes
+* Renders a NodeStructureGUI object 
+* Used to display the population of the GeneticProgram
+* Able to render multiple generations of NodeStructureGUIs
 
 ## Project Contents Overview
 
