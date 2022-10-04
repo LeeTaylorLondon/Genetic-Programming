@@ -121,21 +121,24 @@ class GeneticProgram:
         population members are to be selected. """
         # Unpack selection array & assign values
         s1, s2 = sarr
-        p1, p2 = self.population[s1], self.population[s2]
+        p1, p2 = self.population[s1].__copy__(), self.population[s2].__copy__()
+        # DEBUG
         if debug:
             print("BEFORE")
             p1.print_depth_hashmap()
             p2.print_depth_hashmap()
         sn1 = selected_node1 = p1.rand_node()
         sn2 = selected_node2 = p2.rand_node(ntype=sn1.eval_type())
+        # DEBUG
         if debug:
             print("^^ SN1 : SN2 ^^")
             print(sn1)
             print(sn2)
             print("================================")
-        # Do not perform crossover if two of the same type do not exist
         # Todo: change return condition here
-        if sn1.eval_type() != sn2.eval_type(): return
+        # Do not perform crossover if two of the same type do not exist
+        if sn1.eval_type() != sn2.eval_type():
+            return
         # Overwrite sn1.val
         if sn2.val in func_set:
             sn1.val = sn2.val
@@ -149,11 +152,12 @@ class GeneticProgram:
         # Overwrite left & right
         sn1.left  = sn2.left
         sn1.right = sn2.right
+        # DEBUG
         if debug:
             print("AFTER")
             p1.print_depth_hashmap()
             p2.print_depth_hashmap()
-
+        return p1, p2
 
     def _mutate(self, sarr, chance_for_mutant=0.3):
         # 30% to generate a new subtree 70% to switch a value

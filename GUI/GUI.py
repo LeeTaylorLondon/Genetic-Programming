@@ -17,21 +17,23 @@ class Window:
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
         # self.ns      = NodeStructureGUI(self.screen)
-        self.gp      = GeneticProgram(count=4)
+        self.popsize = 8
+        self.gens    = 1
+        self.gp      = GeneticProgram(count=self.popsize)
         self.ns      = [[NodeStructureGUI(self.screen, ns) for ns in self.gp.population]]
-        self.ns.append([NodeStructureGUI(self.screen) for x in range(4)])
-        self.ns.append([NodeStructureGUI(self.screen) for x in range(4)])
+        for _ in range(self.gens):
+            self.ns.append([NodeStructureGUI(self.screen) for x in range(self.popsize - 7)])
         # self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
         self.xoverlap = 0
         self.yoverlap = 0
         self.nsspace = 25
         self.yoffset = 25 # Speed of scrolling
         self.yoffse_ = 0  # Var applied
-        self.init_ns() # Prevents overlapping GUI elements
+        self.init_nss() # Prevents overlapping GUI elements
         # continuous loop
         self.render()
 
-    def init_ns(self):
+    def init_nss(self):
         """ This method prevents NodeStrucGUIs from overlapping
          by applying an offset to each NSGUI object. """
         if type(self.ns) != list:
@@ -76,7 +78,7 @@ class Window:
                 print(obj.pygame_coords)
         pass
 
-    def change_nscolor(self, v=0, i=0, new_color=RED, old_color=CGREEN):
+    def change_nscolor(self, i=0, v=0, new_color=RED, old_color=CGREEN):
         if type(i) == list:
             for x in i:
                 self.change_nscolor(x, new_color=new_color)
@@ -85,13 +87,44 @@ class Window:
         if self.ns[v][i].color == new_color:
             new_color = old_color
         # Re-assign color and regenerate some objects
-        self.ns[i].color = new_color
-        self.ns[i].pygame_fitness = self.ns[i].init_pygame_fitness()
-        for arr in self.ns[i].circle_objects:
+        self.ns[v][i].color = new_color
+        self.ns[v][i].pygame_fitness = self.ns[v][i].init_pygame_fitness()
+        for arr in self.ns[v][i].circle_objects:
             for nod in arr:
                 nod.color = new_color
                 nod.pygame_lcolor = new_color
                 nod.pygame_text = nod.init_pygame_text()
+
+    def apply_scrolling(self):
+        # Scrolling
+        for vec in self.ns:
+            for nsobj in vec:
+                nsobj.apply_y_offset(self.yoffse_)
+        self.yoffse_ = 0
+
+    def add_nodestruc(self, ns, v=0, i=0):
+        """ Calculate and apply x & y offset
+        from the respective 'vector' """
+        xoffset, yoffset = 0, 0
+        # Calculate Y spacing
+        rn = self.ns[v][0].circle_objects[0][0]
+        yoffset = rn.pygame_coords[1] - (rn.pygame_radius * 2) - ns.pad + 1
+        # Change height
+        ns.apply_y_offset(yoffset)
+        # Calculate X spacing
+        for nsgui in self.ns[v]:
+            xoffset += nsgui.calc_pixel_width()
+            xoffset += self.nsspace
+        # self.activate_yoverlap(i)
+        ns.hitbox[0]         += xoffset
+        ns.pygame_fitness[0] += xoffset
+        ns.botbox[0]         += xoffset
+        # Apply spacing -> to the next one
+        for coarr in ns.circle_objects:
+            for nodegui in coarr:
+                x, y = nodegui.pygame_coords
+                nodegui.set_pygame_coords(x + xoffset, y)
+        self.ns[v].insert(i, ns)
 
     def render(self) -> NoReturn:
         # self.ns.set_node_depths()
@@ -116,13 +149,22 @@ class Window:
                         # self.debug_circleobjs()
                         for obj in self.ns: obj.print_depth_hashmap()
                     if event.key == pygame.K_c:
-                        self.change_nscolor()
+                        # self.change_nscolor()
+                        sarr = self.gp.selection()
+                        cons = self.gp.crossover(sarr, debug=False)
+                        # DEBUG DEBUG DEBUG DEBUG
+                        for _ in self.ns:
+                            print(f"_ = {_}")
+                        print()
+                        self.add_nodestruc(NodeStructureGUI(self.screen, [cons]), v=1)
+                        # self.ns[1].append(NodeStructureGUI(self.screen, [cons]))
+                        # self.init_nss()
+                        # DEBUG DEBUG DEBUG DEBUG
+                        for _ in self.ns:
+                            print(f"_ = {_}")
+                        print()
             self.screen.fill(L1BLACK)
-            # Scrolling
-            for vec in self.ns:
-                for nsobj in vec:
-                    nsobj.apply_y_offset(self.yoffse_)
-            self.yoffse_ = 0
+            self.apply_scrolling()
             # --[render start]--
             """ Render each NodeStructure """
             for vec in self.ns:
