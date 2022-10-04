@@ -20,10 +20,27 @@ Create relativity calculations. Possibly impose the whole NS-GUI
  onto a giant invisible square. Store these somewhere? 
 """
 
+"""
+class NodeStructure:
+    def __init__(self, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
+        if root is None: self.root = Node(func_set[rand(0, 3)], None, None, None)
+        else: self.root = root
+        self.depth_lim  = rand(depth_lim_lower, depth_lim_upper)
+        self.depth_max  = self.depth_lim
+        self.depth_hashmap = self.init_depth_hashmap()
+        self.func_chance   = 0.5
+        self.fitness = None
+        self.queued  = False
+        self.genetic_makeup = 'natural'
+        # Generate structure of functions and terms
+        if gen_struc: self.gen_structure()
+        self.depth_lim = max(self.depth_lim, self.depth_max)
+"""
 
 # ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
     def __init__(self, screen, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
+        # Todo: pass NodeStructure to NodeStructureGUI(...) to inherit it's values
         super(NodeStructureGUI, self).__init__()
         self.screen         = screen
         self.spacingx       = 45
@@ -35,7 +52,7 @@ class NodeStructureGUI(NodeStructure):
         self.root           = self.circle_objects[0][0] # NodeGUI
         self.pixel_width    = self.calc_pixel_width()
         self.pixel_height   = self.calc_pixel_height()
-        self.hitbox         = self.init_hitbox() # Rect = [x, y, w, h]
+        self.hitbox         = self.init_hitbox()        # Rect = [x, y, w, h]
         self.botbox         = self.init_botbox()
         self.pygame_fitness = self.init_pygame_fitness()
         # self.init_hitbox()

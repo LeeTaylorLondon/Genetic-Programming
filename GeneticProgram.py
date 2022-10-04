@@ -2,6 +2,7 @@ from Classes import NodeStructure
 from GlobalVariables import measure_fitness, obj_func, term_set, func_set
 from random import random as rf
 from random import randint as rand
+from typing import List
 
 
 class GeneticProgram:
@@ -47,20 +48,9 @@ class GeneticProgram:
             self.pm[0][replace_i] = NodeStructure()
             print(self.population)
 
-    def selection(self):
-        """ # ---- Variables ---- #
-            fn = [28.7, 28.7, 110.5, 8.7]  # Fitness values (normal)
-            fs = [20, 5, 10, 5]            # Fitness values (small)
-            # ---- Calculations ---- #
-            fsum = sum(fn)              # = 176.6
-            pval = [f/fsum for f in fn] # = [0.16, 0.16, 0.63, 0.05]
-            sump = sum(pval)            # = 1.0
-            roll = [pval[0]]            # = [0.16]
-            for i,v in enumerate(pval[1:]):
-                roll.append(v + roll[i])
-            print(fsum, pval, sump)
-            print(roll)                 # = [0.16, 0.33, 0.95, 1.0]
-        """
+    def selection(self, debug=False):
+        """ Select a population member proportionate to the
+        fitness of the population """
         farr = [measure_fitness(ns) for ns in self.population]
         plis = [f/sum(farr) for f in farr]
         # Roll probability values
@@ -72,10 +62,20 @@ class GeneticProgram:
         rfv, rv = rf(), -1
         for rp in roll[::-1]:
             if rfv < rp: rv = roll.index(rp)
-        print(f"plis={plis}\nroll={roll}\nrv={rv}")
+        if debug: print(f"plis={plis}\nroll={roll}\nrv={rv}")
         return rv
 
-    def crossover(self, sarr, debug=True):
+    def crossover(self, sarr, debug):
+        s1, s2     = sarr
+        ns1, ns2   = self.population[s1], self.population[s2]
+        ns1c, ns2c = self.population[s1].__copy__(), self.population[s2].__copy__()
+        self.population.append(ns1c)
+        print(ns1)
+        print(ns1c)
+        return ns1c
+        pass
+
+    def dep_crossover(self, sarr, debug=True):
         """ :param sarr: Selection Array contains index values for which
         population members are to be selected. """
         # Unpack selection array & assign values

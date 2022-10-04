@@ -20,7 +20,9 @@ class Window:
         self.popsize = 8
         self.gens    = 1
         self.gp      = GeneticProgram(count=self.popsize)
+        print("gp.ns =", self.gp.population)   # DEBUG DEBUG
         self.ns      = [[NodeStructureGUI(self.screen, ns) for ns in self.gp.population]]
+        print("self.ns =", self.ns)            # DEBUG DEBUG
         for _ in range(self.gens):
             self.ns.append([NodeStructureGUI(self.screen) for x in range(self.popsize - 7)])
         # self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
@@ -103,8 +105,7 @@ class Window:
         self.yoffse_ = 0
 
     def add_nodestruc(self, ns, v=0, i=0):
-        """ Calculate and apply x & y offset
-        from the respective 'vector' """
+        """ Calculate and apply x & y offset from the respective 'vector' """
         xoffset, yoffset = 0, 0
         # Calculate Y spacing
         rn = self.ns[v][0].circle_objects[0][0]
@@ -151,9 +152,11 @@ class Window:
                     if event.key == pygame.K_c:
                         # self.change_nscolor()
                         sarr = self.gp.selection(), self.gp.selection()
-                        cons = self.gp.crossover(sarr, debug=False)
+                        nsco = self.gp.crossover(sarr, debug=False)
+                        nsco = NodeStructureGUI(self.screen, nsco)
+                        print(nsco)
                         self.change_nscolor(sarr, v=0)
-                        self.add_nodestruc(NodeStructureGUI(self.screen, [cons]), v=1)
+                        self.add_nodestruc(nsco, v=1)
             self.screen.fill(L1BLACK)
             self.apply_scrolling()
             # --[render start]--
