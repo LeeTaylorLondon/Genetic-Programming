@@ -47,74 +47,33 @@ class GeneticProgram:
             self.pm[0][replace_i] = NodeStructure()
             print(self.population)
 
-    def selection(self, debug_counter=0, out=False):
-        """ Creates values fitness, proportions, and rolling percentages
-        to select (in a roulette fashion) two random NodeStructures from
-        the self.population.
-
-        value 'matrix' stores vectors of 4 values for each pop. member
-        read it top-left -> going-down -> then-across (columns not rows)
-        ------------------------------------------------------
-        vec[0]  | vec[1]     | vec[2]     | vec[3]
-        fitness | proportion | percentage | rolling sum of %
-        ------------------------------------------------------
-        [132.7, 2.09, 0.1, 0.1]
-        [68.7, 4.03, 0.19, 0.28]
-        [46.6, 5.94, 0.27, 0.56]
-        [28.7, 9.64, 0.44, 1.0]
+    def selection(self):
+        """ # ---- Variables ---- #
+            fn = [28.7, 28.7, 110.5, 8.7]  # Fitness values (normal)
+            fs = [20, 5, 10, 5]            # Fitness values (small)
+            # ---- Calculations ---- #
+            fsum = sum(fn)              # = 176.6
+            pval = [f/fsum for f in fn] # = [0.16, 0.16, 0.63, 0.05]
+            sump = sum(pval)            # = 1.0
+            roll = [pval[0]]            # = [0.16]
+            for i,v in enumerate(pval[1:]):
+                roll.append(v + roll[i])
+            print(fsum, pval, sump)
+            print(roll)                 # = [0.16, 0.33, 0.95, 1.0]
         """
-        # self.fitness_replace() # debug
-        # Init. matrix
-        matrix = [[0.0, 0.0, 0.0, 0.0] for _ in self.population]
-        # calculate and populate vec[0]
-        for vec, p in zip(matrix, self.population):
-            mfp = measure_fitness(p)
-            if mfp == 0:
-                vec[0] = 9999.9 # Todo: replace with found-end!
-                # print('9999.9')
-                debug_counter[0] += 1
-            else: vec[0] = mfp
-        fitness_summed = sum([vec[0] for vec in matrix])
-        # calculate and populate vec[1]
-        for vec in matrix:
-            vec[1] = 1/(float(vec[0]/fitness_summed))
-        proportion_summed = sum(vec[1] for vec in matrix)
-        # calculate and populate vec[2] & vec[3]
-        matrix[0][2] = matrix[0][1]/proportion_summed
-        matrix[0][3] = matrix[0][1]/proportion_summed
-        for i,vec in enumerate(matrix[1:]):
-            vec[2] = vec[1]/proportion_summed
-            vec[3] = matrix[i][3] + vec[2]
-        # Roulette selection ~ rf = randomfloat, s = selection
-        rf1, rf2, s1, s2 = rf(), rf(), None, None
-        while s1 is None or s2 is None or s1 == s2:
-            # Generate random float for selection boundry
-            if rf1 < matrix[0][3]: s1 = 0
-            if rf2 < matrix[0][3]: s2 = 0
-            # if rfx within boundary and current selection is None
-            for i,vec in enumerate(matrix):
-                print(round(matrix[i][3], 2))
-                if matrix[i][3] < rf1 <= matrix[i+1][3] and s1 is None: s1 = i + 1
-                if matrix[i][3] < rf2 <= matrix[i+1][3] and s2 is None: s2 = i + 1
-            print("")
-            if s1 is None: rf1, s1 = rf(), None
-            if s2 is None: rf2, s2 = rf(), None
-            # Todo: optional - prevent selecting itself - enters infinite loop
-            if s1 == s2:
-                break
-                # rf1, rf2 = rf(), rf()
-        # if s1 == s2: raise TypeError("Equal Selection!")
-        # Debug information
-        if out:
-            print([vec[3] for vec in matrix])
-            print(str(rf1) + " " + str(rf2) + " " + str(s1) + " " + str(s2) + '\n')
-        return s1, s2
-
-    def move_popualtion(self):
-        """ Moves the population from self.population into
-        self.pm. i.e [x, ...] -> [[?], [?], [x, ...]]
-        """
-        pass
+        farr = [measure_fitness(ns) for ns in self.population]
+        plis = [f/sum(farr) for f in farr]
+        # Roll probability values
+        roll = [plis[0]]
+        for i, v in enumerate(plis[1:]):
+            roll.append(v + roll[i])
+        roll[-1] = 1.0
+        # Compare random-float and random-probability
+        rfv, rv = rf(), -1
+        for rp in roll[::-1]:
+            if rfv < rp: rv = roll.index(rp)
+        print(f"plis={plis}\nroll={roll}\nrv={rv}")
+        return rv
 
     def crossover(self, sarr, debug=True):
         """ :param sarr: Selection Array contains index values for which
@@ -158,6 +117,12 @@ class GeneticProgram:
             p1.print_depth_hashmap()
             p2.print_depth_hashmap()
         return p1, p2
+
+    def move_popualtion(self):
+        """ Moves the population from self.population into
+        self.pm. i.e [x, ...] -> [[?], [?], [x, ...]]
+        """
+        pass
 
     def _mutate(self, sarr, chance_for_mutant=0.3):
         # 30% to generate a new subtree 70% to switch a value
