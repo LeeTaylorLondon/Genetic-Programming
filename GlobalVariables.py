@@ -1,5 +1,5 @@
-from Classes import List
-from types import FunctionType
+from Classes    import List
+from types      import FunctionType
 
 
 # -- Function set definitions & other functions --
@@ -62,6 +62,7 @@ def measure_fitness(nstruc, clear_cval=False):
             except TypeError as e:
                 print("-----DEBUG------")
                 nstruc.print_depth_hashmap()
+                print(type(nstruc.root), nstruc.root.val, nstruc.root.left)
                 print("inter-val: ", nstruc.interpreter())
                 raise e
     nstruc.fitness = summed_diff

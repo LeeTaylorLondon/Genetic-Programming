@@ -20,9 +20,7 @@ class Window:
         self.popsize = 8
         self.gens    = 1
         self.gp      = GeneticProgram(count=self.popsize)
-        print("gp.ns =", self.gp.population)   # DEBUG DEBUG
-        self.ns      = [[NodeStructureGUI(self.screen, ns) for ns in self.gp.population]]
-        print("self.ns =", self.ns)            # DEBUG DEBUG
+        self.ns      = [[NodeStructureGUI(self.screen, ns=ns, gen_struc=False) for ns in self.gp.population]]
         for _ in range(self.gens):
             self.ns.append([NodeStructureGUI(self.screen) for x in range(self.popsize - 7)])
         # self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
@@ -153,7 +151,7 @@ class Window:
                         # self.change_nscolor()
                         sarr = self.gp.selection(), self.gp.selection()
                         nsco = self.gp.crossover(sarr, debug=False)
-                        nsco = NodeStructureGUI(self.screen, nsco)
+                        nsco = NodeStructureGUI(self.screen, ns=nsco)
                         print(nsco)
                         self.change_nscolor(sarr, v=0)
                         self.add_nodestruc(nsco, v=1)

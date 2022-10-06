@@ -1,8 +1,9 @@
 from Classes         import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr, len_
-from Consts          import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str, CGREEN, RED
+from GUI.Consts      import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str, CGREEN, RED
 from NodeGUI         import NodeGUI
 import pygame.draw
+
 
 """
 Purpose: GUI version of NodeStructure, this class is used 
@@ -20,27 +21,29 @@ Create relativity calculations. Possibly impose the whole NS-GUI
  onto a giant invisible square. Store these somewhere? 
 """
 
+
 """
 class NodeStructure:
-    def __init__(self, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
-        if root is None: self.root = Node(func_set[rand(0, 3)], None, None, None)
-        else: self.root = root
-        self.depth_lim  = rand(depth_lim_lower, depth_lim_upper)
-        self.depth_max  = self.depth_lim
+    def __init__(self, root=None, ..., gen_struc=True):
+        if root is None: 
+            self.root = Node(func_set[rand(0, 3)], None, None, None)
+        else: 
+            self.root = root
         self.depth_hashmap = self.init_depth_hashmap()
-        self.func_chance   = 0.5
-        self.fitness = None
-        self.queued  = False
-        self.genetic_makeup = 'natural'
+        ...
         # Generate structure of functions and terms
         if gen_struc: self.gen_structure()
-        self.depth_lim = max(self.depth_lim, self.depth_max)
 """
+
 
 # ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
-    def __init__(self, screen, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
+    def __init__(self, screen, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True, ns=None):
         # Todo: pass NodeStructure to NodeStructureGUI(...) to inherit it's values
+        """ WIP """
+        if ns != None:
+            gen_struc = self.inherit_(ns, screen)
+        """ ^^ WIP ^^ """
         super(NodeStructureGUI, self).__init__()
         self.screen         = screen
         self.spacingx       = 45
@@ -50,6 +53,15 @@ class NodeStructureGUI(NodeStructure):
         self.color          = CGREEN
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
+        """ Debug """
+        if ns != None:
+            self.depth_hashmap  = ns.depth_hashmap
+            self.circle_objects = self.init_circle_objects()
+            self.root           = self.circle_objects[0][0]  # NodeGUI
+            int_out = self.interpreter()
+            print(int_out)
+            # print(self.depth_hashmap)
+        """ Debug """
         self.pixel_width    = self.calc_pixel_width()
         self.pixel_height   = self.calc_pixel_height()
         self.hitbox         = self.init_hitbox()        # Rect = [x, y, w, h]
@@ -58,6 +70,19 @@ class NodeStructureGUI(NodeStructure):
         # self.init_hitbox()
         self.init_lrp()
 
+    def inherit_(self, ns, screen):
+        gen_struc = False             # Do not generate new structure
+        nshashmp  = ns.depth_hashmap  # Shortcut to depth_hashmap
+        """ For loop changes each object.type to -> GUI-counter-part """
+        for i, arr in enumerate(ns.depth_hashmap.values()):
+            for i, node in enumerate(arr):
+                print(f"node .left .right = {node, node.left, node.right}")
+                arr[i] = NodeGUI(node, screen, left_=node.left, right_=node.right, parent_=node.parent)
+                print(f"node .left .right = {node, node.left, node.right}\n")
+            nshashmp[i] = arr
+        self.ns = nshashmp
+        return gen_struc
+
     def apply_y_offset(self, y_offset):
         """ This allows the user to scroll down """
         for arr in self.circle_objects:
@@ -65,6 +90,10 @@ class NodeStructureGUI(NodeStructure):
                 node.pygame_coords[1] = node.pygame_coords[1] + y_offset
         self.hitbox[1] += y_offset
         self.botbox[1] += y_offset
+
+    def nodes_to_nodesgui(self):
+
+        pass
 
     def calc_pixel_width(self):
         """ Calculates and returns the pixel width

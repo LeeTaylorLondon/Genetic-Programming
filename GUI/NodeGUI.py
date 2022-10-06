@@ -1,18 +1,20 @@
-from Classes         import NodeStructure, Node, List
-from GlobalVariables import measure_fitness, funcrepr
-from Consts          import BLACK, WHITE, D_BLUE, create_text, create_text_str, CGREEN, RED
+from Classes             import NodeStructure, Node, List
+from GlobalVariables     import measure_fitness, funcrepr
+from GUI.Consts          import BLACK, WHITE, D_BLUE, create_text, create_text_str, CGREEN, RED
 import pygame.draw
+
 
 # ------ Class Definition Start ------
 class NodeGUI(Node):
-    def __init__(self, node, screen):
-        super(NodeGUI, self).__init__(val=node.val)
+    def __init__(self, node, screen, left_=None, right_=None, parent_=None, debug=False):
+        super(NodeGUI, self).__init__(val=node.val, left=left_, right=right_, parent=parent_)
         self.node          = node
         self.l             = None
         self.r             = None
         self.p             = None
         self.screen        = screen
         self.color         = CGREEN
+        if debug: return
         self.pygame_val    = self.init_pygame_val()
         self.pygame_text   = create_text_str(self.pygame_val, 22, self.color)
         self.pygame_textr  = self.pygame_text.get_rect()

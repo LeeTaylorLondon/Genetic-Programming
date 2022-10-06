@@ -1,7 +1,7 @@
-from Classes import Node, List
-from GlobalVariables import func_set, obj_func, xt, term_set, whole_set, measure_fitness
-from random import randint as rand
-from random import random
+from Classes            import Node, List
+from GlobalVariables    import func_set, obj_func, xt, term_set, whole_set, measure_fitness
+from random             import randint as rand
+from random             import random
 
 
 """ -- Class Containing Nodes -- """
@@ -29,9 +29,15 @@ class NodeStructure:
         for d in range(1, 8): rv.update({d: []})
         return rv
 
-    def print_depth_hashmap(self, fitv=False, cval=False, objf=False):
+    def print_depth_hashmap(self, fitv=False, cval=False, objf=False, hidden=False):
         """ Outs each level of the hashmap. """
         rangevar = max(self.depth_lim, self.depth_max)
+        if hidden:
+            print(f"F: {round(measure_fitness(self), 3)}")
+            for i,arr in enumerate(self.depth_hashmap.values()):
+                if len(arr) != 0: print([(len(arr)) * " Φ "])
+        return
+        print("--------------------------------")
         print("self.depth_lim, self.depth_max", self.depth_lim, self.depth_max)
         for d in range(0, rangevar + 1):
             print(d, self.depth_hashmap.get(d))
@@ -39,7 +45,7 @@ class NodeStructure:
         if self.root.cval is not None and type(self.root.cval) is List:
             if cval: print("cval: " + str(self.root.cval.printv()))
             if objf: print("objf: " + str(obj_func(xt, out=False)))
-        print("--------------------------------")
+        print("--------------------------------\n")
 
     def refresh_depth_hashmap(self, out=False):
         """ After a structure change the depth_hashmap
@@ -177,12 +183,22 @@ class NodeStructure:
         self.reset_cval_all_c()
         # curr_depth = self.depth_lim
         # curr_depth = max(self.depth_max, self.depth_lim)
-        curr_depth = 3
+        curr_depth = 3 # Todo: this should be variable
         while curr_depth != -1:
             nodes = self.depth_hashmap[curr_depth]
             for n in range(0, len(nodes) - 1, 2):
                 l, r, p = nodes[n], nodes[n+1], nodes[n].parent
-                lv, rv, pv = l.val, r.val, p.val
+                # lv, rv, pv = l.val, r.val, p.val
+                lv = l.val
+                rv = r.val
+                # Try-catch
+                try:
+                    pv = p.val
+                except AttributeError as e:
+                    print(f"AttributeError DepthHashMap-> {self.print_depth_hashmap()}")
+                    print(f"Node -> {print(n)}")
+                    raise e
+                # Try-catch end
                 if l.parent != r.parent: raise TypeError("Mismatching Parents!")
                 # Calculations + try-catch
                 try:
@@ -311,6 +327,40 @@ class NodeStructure:
         rv.depth_max = max_depth - 1
         rv.genetic_makeup = 'copy'
         return rv
+
+    def copy_gui(self):
+        rootc, og   = self.root.__copy__()
+        q, qnext    = [], []
+        # Queue the originals (not copies to check for children)
+        # ... and to copy from
+        rootc.left  = og.left.__copy__(q)
+        rootc.right = og.right.__copy__(q)
+        rootc.left.parent, rootc.right.parent, = rootc, rootc
+        # Linking loop
+        while len(q) != 0:
+            copy, og = q.pop()
+            if not og.has_children(): continue
+            copy.left  = og.left.__copy__(q)
+            copy.right = og.right.__copy__(q)
+            copy.left.parent, copy.right.parent = copy, copy
+        pass
+        # End - Create NodeStructure from root value and return
+        rv = NodeStructure(root=rootc, gen_struc=False)
+        rv.refresh_depth_hashmap()
+        # Debug Debug Debug Debug
+        # print(">>> NodeStructure.__copy__(self) <<<")
+        # rv.print_depth_hashmap()
+        # Find max depth
+        max_depth = 0
+        while True:
+            if len(self.depth_hashmap[max_depth]) != 0:
+                max_depth += 1
+            else:
+                break
+        rv.depth_max = max_depth - 1
+        rv.genetic_makeup = 'copy'
+        return rv
+        pass
 
     def __str__(self):
         # try:
