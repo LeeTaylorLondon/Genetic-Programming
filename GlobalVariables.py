@@ -4,26 +4,48 @@ from types      import FunctionType
 
 # -- Function set definitions & other functions --
 def add(x, y):
-    if type(y) is List: return y.__add__(x)
-    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
-    return x.__add__(y)
+    try:
+        if type(y) is List: return y.__add__(x)
+        if type(y) is float and type(x) is not List: x, y = float(x), float(y)
+        if x is None and y is None:
+            raise ValueError('Two Nones were added')
+        return x.__add__(y)
+    except Exception as e:
+        raise e
+        print(f'x={x}, y={y}')
+        print(e)
+        return -1
 
 def sub(x, y):
-    if type(y) is List: return y.__sub__(x)
-    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
-    return x.__sub__(y)
+    try:
+        if type(y) is List: return y.__sub__(x)
+        if type(y) is float and type(x) is not List: x, y = float(x), float(y)
+        return x.__sub__(y)
+    except Exception as e:
+        raise e
+        return -1
 
 def mul(x, y):
-    if type(y) is List: return y.__mul__(x)
-    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
-    return x.__mul__(y)
+    try:
+        if type(y) is List: return y.__mul__(x)
+        if type(y) is float and type(x) is not List: x, y = float(x), float(y)
+        return x.__mul__(y)
+    except Exception as e:
+        raise e
+        print(e)
+        return -1
 
 def div(x, y):
-    if y == 0: return x
-    if type(y) is List: return y.__truediv__(x)
-    if type(y) is FunctionType: raise TypeError("other is type 'function'")
-    if type(y) is float and type(x) is not List: x, y = float(x), float(y)
-    return x.__truediv__(y)
+    try:
+        if y == 0: return x
+        if type(y) is List: return y.__truediv__(x)
+        if type(y) is FunctionType: raise TypeError("other is type 'function'")
+        if type(y) is float and type(x) is not List: x, y = float(x), float(y)
+        return x.__truediv__(y)
+    except Exception as e:
+        raise e
+        print(e)
+        return -1
 
 def funcrepr(func):
     # todo: test
@@ -50,7 +72,7 @@ def measure_fitness(nstruc, clear_cval=False):
     """ Outputs the absolute summed difference of
      the object fucntion and generated NodeStructure. """
     desired_y   = obj_func(None, out=False)
-    produced_y  = nstruc.interpreter(out=False)
+    produced_y  = nstruc.interpreter(out=True)
     summed_diff = 0.0
     if type(produced_y) is List:
         for dy,py in zip(desired_y, produced_y):
@@ -61,9 +83,13 @@ def measure_fitness(nstruc, clear_cval=False):
                 summed_diff += abs(produced_y - dy)
             except TypeError as e:
                 print("-----DEBUG------")
-                nstruc.print_depth_hashmap()
-                print(type(nstruc.root), nstruc.root.val, nstruc.root.left)
-                print("inter-val: ", nstruc.interpreter())
+                # nstruc.print_depth_hashmap()
+                # print(type(nstruc.root), nstruc.root.val, nstruc.root.left)
+                print("interpreter() = " + str(nstruc.interpreter()))
+                print("produced_y = " + str(produced_y))
+                print("dy = " + str(dy))
+                print()
+                print()
                 raise e
     nstruc.fitness = summed_diff
     if clear_cval: nstruc.reset_cval_all_c()

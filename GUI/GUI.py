@@ -17,12 +17,15 @@ class Window:
         self.clock  = pygame.time.Clock()
         # Non-pygame attrs
         # self.ns      = NodeStructureGUI(self.screen)
-        self.popsize = 8
-        self.gens    = 1
+        self.popsize = 5
+        self.gens    = 0
         self.gp      = GeneticProgram(count=self.popsize)
         self.ns      = [[NodeStructureGUI(self.screen, ns=ns, gen_struc=False) for ns in self.gp.population]]
-        for _ in range(self.gens):
-            self.ns.append([NodeStructureGUI(self.screen) for x in range(self.popsize - 7)])
+
+        # # What is this?!
+        # for _ in range(self.gens):
+        #     self.ns.append([NodeStructureGUI(self.screen) for x in range(self.popsize - 7)])
+
         # self.ns      = [NodeStructureGUI(self.screen) for _ in range(6)]
         self.xoverlap = 0
         self.yoverlap = 0

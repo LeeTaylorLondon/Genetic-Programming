@@ -27,11 +27,14 @@ class Node:
         self.mark_calc = False # Denotes if it's already added to a calculation
 
     def has_children(self):
-        if self.left is not None and self.right is not None: return True
-        else: return False
+        if self.left is not None and self.right is not None:
+            return True
+        else:
+            return False
 
     def eval_type(self):
-        if func_set.__contains__(self.val): return "func"
+        if func_set.__contains__(self.val):
+            return "func"
         return "term"
 
     def eval_depth(self):
@@ -71,8 +74,14 @@ class Node:
         return self.__repr__()
 
     def __repr__(self):
-        if self.cval is None: return "<D=" + str(self.depth) + "|" + self.printf(self.val) + ">"
-        else: return "<D=" + str(self.depth) + "|" + self.printf(self.val) + "|" + self.printf(self.cval) + ">"
+        # if self.cval is None:
+        #     return "<D=" + str(self.depth) + "|" + self.printf(self.val) + ">"
+        # else:
+        #     return "<D=" + str(self.depth) + "|" + self.printf(self.val) + "|" + self.printf(self.cval) + ">"
+        if self.cval is None:
+            return "<D=" + str(self.eval_depth()) + "|" + self.printf(self.val) + ">"
+        else:
+            return "<D=" + str(self.eval_depth()) + "|" + self.printf(self.val) + "|" + self.printf(self.cval) + ">"
 
     def __copy__(self, arr=None):
         """ Node Attrs: val, cval, type, left, right, parent, mark_Calc, queued

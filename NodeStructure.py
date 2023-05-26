@@ -26,7 +26,7 @@ class NodeStructure:
          Used in gen_structure to become multi-level.
          Used in crossover to represent the new structure. """
         rv = {0: [self.root]}
-        for d in range(1, 8): rv.update({d: []})
+        for d in range(1, 16): rv.update({d: []})
         return rv
 
     def print_depth_hashmap(self, fitv=False, cval=False, objf=False, hidden=False):
@@ -49,7 +49,8 @@ class NodeStructure:
 
     def refresh_depth_hashmap(self, out=False):
         """ After a structure change the depth_hashmap
-         needs to be updated to represent the new structure. """
+         needs to be updated to represent the new structure.
+        """
         self.depth_hashmap = self.init_depth_hashmap()
         # for d in range(0, self.depth_lim):
         # for d in range(0, self.find_max_depth() + 1):
@@ -107,71 +108,113 @@ class NodeStructure:
                 node.depth = node.eval_depth()
 
     ''' Generation methods '''
-    def gen_node(self, parent, curr_depth, forcef=False):
+    def gen_node(self, parent, curr_depth, type_=-1):
         """ Generate an individual func. or term. as a Node """
-        # Force leaves (Node(s) @ depth_lim) to become terms
-        if curr_depth + 1 == self.depth_lim: t_or_f = 1 # set to term
-        else: t_or_f = rand(0, len(whole_set) - 1)
-        if forcef: t_or_f = 0
-        # Choose random function
-        if t_or_f == 0: rand_item = rand(0, len(whole_set[t_or_f]) - 1)
-        # Choose random term where x has a P%-chance to be chosen
+        # Determine type of node
+        if type_ not in [-1, 0, 1]:
+            raise ValueError("NodeStructure.gen_node(...) param 'type_' must be one of [-1, 0, 1].")
+        # Choose type
+        if type_ == -1:
+            type_ = rand(0, 1)
+        # if type is function -> Random function
+        if type_ == 0:
+            rand_item = rand(0, len(whole_set[type_]) - 1)
+        # if type is term -> Random term value
         else:
-            x_or_c = random()
             # P%-chance for a term to be a constant or xt
-            if x_or_c > 0.5: rand_item = rand(1, len(whole_set[t_or_f]) - 1)
-            else: rand_item = 0
+            if random() > 0.5:
+                rand_item = rand(1, len(whole_set[type_]) - 1)
+            else:
+                rand_item = 0
         # Construct Node
-        node = Node(whole_set[t_or_f][rand_item], None, None, parent)
+        node = Node(whole_set[type_][rand_item], None, None, parent)
         # Store a copy of xt as the value
         if node.val == xt:
             node.val = xt()
             print(node.val)
         return node
 
+    def explore(self, out=False):
+        unexplored = [self.root]
+        i = 0
+        while len(unexplored) != 0:
+            popped = unexplored.pop()
+            unexplored.append(popped.left)
+            unexplored.append(popped.right)
+            unexplored = [n for n in unexplored if n != None]
+            if out: print(i, popped)
+            i += 1
+            yield popped
+
+    def calc_max_depth(self):
+        """ Calculate and return the maximum depth.
+        todo: investigate why this returns 0 sometimes
+            when it should not.
+        """
+        return_val = 0
+        for node in self.explore():
+            return_val = max(return_val, node.eval_depth())
+        return return_val
+
+    def change_self(self):
+        ...
+
+    def gen_children(self, node, types=[-1, -1]):
+        """ list[int] : types == 0 or 1 """
+        # Do not generate children for terminal nodes
+        if node.type == 'term':
+            return [node, node]
+        # Generate 2 new nodes
+        left  = self.gen_node(node, node.eval_depth(), types[0])
+        right = self.gen_node(node, node.eval_depth(), types[1])
+        # Link parents and children
+        node.left = left
+        node.right = right
+        left.parent = node
+        right.parent = node
+        # Mark EOF
+        return left, right
+
     def gen_structure(self):
-        """ Generate a collection of linked nodes """
-        # Queue of nodes to have children
+        """ Generate a NodeStructure """
+        # Generate a structure of nodes
+        # While not at depth limit or no more branches
         nodes = [self.root]
-        # Stop gen no more children
-        while len(nodes) != 0:
-            # Set current_node to nodes[0] & del nodes[0]
+        while self.calc_max_depth() != self.depth_lim and len(nodes) > 0:
+            # Generate children
             current_node = nodes.pop()
-            # Prevent adding children to terminal nodes
-            if current_node.type == "term": continue
-            # Create left & right Nodes
-            lr = [self.gen_node(current_node, current_node.eval_depth()),
-                  self.gen_node(current_node, current_node.eval_depth())]
-            left, right = lr[0], lr[1]
-            """ This should be across an entire level not just left and right """
-            # Force switch when .depth_lim is not reached & depth is only terms
-            if term_set.__contains__(left.val) and term_set.__contains__(right.val) and\
-                current_node.eval_depth() + 1 < self.depth_lim:
-                lr[rand(0, 1)] = self.gen_node(current_node, current_node.eval_depth(), forcef=True)
-                left, right = lr[0], lr[1] # Update left, right values
-            # Force ending nodes into terms
-            if current_node.eval_depth() + 1 == self.depth_lim and len(nodes) == 0:
-                for node in self.depth_hashmap.get(self.depth_lim):
-                    if node.eval_type() == 'func': node.force_switch()
-            # Set children nodes to left and right
-            current_node.left, current_node.right = left, right
-            # Store children in depth_hashmap against depth
-            # Use .extend method to enforce a specific order
-            lr.extend(self.depth_hashmap[left.eval_depth()])
-            self.depth_hashmap[left.eval_depth()] = lr
-            # Append left and right node to queue
-            if current_node.eval_depth() + 1 != self.depth_lim:
-                nodes.append(current_node.left)
-                nodes.append(current_node.right)
-        self.refresh_depth_hashmap()
-        # Find max depth
-        max_depth = 0
-        while True:
-            if len(self.depth_hashmap[max_depth]) != 0:
-                max_depth += 1
-            else:
-                break
-        self.depth_max = max_depth - 1
+            new_nodes = self.gen_children(current_node)
+            # Store branches to generate further on
+            for new_node in new_nodes:
+                if new_node.eval_type() == 'func':
+                    nodes.append(new_node)
+        # Force ending nodes to be terms
+        # Replace nodes at depth limit with terms :)
+        for node in self.explore():
+            if node.eval_depth() == self.calc_max_depth() - 1:
+                self.gen_children(node, types=[1, 1])
+            if node.eval_type() == 'func' and (node.left is None or node.right is None):
+                print(f"node.eval_type() == 'func' and (node.left is None or node.right is None) -> "
+                      f"{node, node.val, node.left, node.right}")
+                new_nodes = self.gen_children(node, types=[1, 1])
+        # Handle depth hashmap
+        for node in self.explore():
+            # Populate depth hashmap for interpreter to perform calculations for fitness calc.
+            the_list = self.depth_hashmap.get(node.eval_depth())
+            the_list.append(node)
+            self.depth_hashmap.update({node.eval_depth(): the_list})
+        # Depth hashmap, depth 0 is wrong - this solves it
+        self.depth_hashmap.update({0: [self.depth_hashmap.get(0)[0]]})
+        # ---
+        # Out the nodes to the console
+        print('NodeStructure.gen_structure()')
+        for node in self.explore():
+            print(node)
+        print(self.depth_hashmap)
+        print('NodeStructure.gen_structure() END')
+        print()
+        # Update the depth hashmap
+
         pass
 
     ''' Interpreter methods '''
@@ -180,47 +223,42 @@ class NodeStructure:
          storing the calculated values in Node(s) under
          their attribute .cval. The final result is found
          in self.root.cval. """
-        self.reset_cval_all_c()
-        # curr_depth = self.depth_lim
-        # curr_depth = max(self.depth_max, self.depth_lim)
-        curr_depth = 3 # Todo: this should be variable
-        while curr_depth != -1:
-            nodes = self.depth_hashmap[curr_depth]
-            for n in range(0, len(nodes) - 1, 2):
-                l, r, p = nodes[n], nodes[n+1], nodes[n].parent
-                # lv, rv, pv = l.val, r.val, p.val
-                lv = l.val
-                rv = r.val
-                # Try-catch
-                try:
-                    pv = p.val
-                except AttributeError as e:
-                    print(f"AttributeError DepthHashMap-> {self.print_depth_hashmap()}")
-                    print(f"Node -> {print(n)}")
-                    raise e
-                # Try-catch end
-                if l.parent != r.parent: raise TypeError("Mismatching Parents!")
-                # Calculations + try-catch
-                try:
+        # Acquire matrix of nodes
+        nodes_matrix = list(self.depth_hashmap.values())[::-1]
+        nodes_matrix = [arr for arr in nodes_matrix if arr != []]
+        # Debug
+        print(f'node_structure_max_depth = {self.calc_max_depth()}')
+        print(self.depth_hashmap)
+        print(f'nodes_matrix = {nodes_matrix}')
+        # Perform calculations
+        for node_arr in nodes_matrix:
+            for node in node_arr:
+                if node.eval_type() == 'func':
+                    # Derive left, right, parent nodes and values
+                    l, r, p = node.left, node.right, node
+                    try:
+                        lv, rv, pv = l.val, r.val, p.val
+                    except AttributeError as e:
+                        print(f"l, r, p = {l, r, p}")
+                        raise e
+                    # Perform calculations
                     if l.cval is not None and r.cval is not None:
                         p.cval = pv(l.cval, r.cval)
-                    elif l.cval is not None: p.cval = pv(l.cval, rv)
-                    elif r.cval is not None: p.cval = pv(lv, r.cval)
-                    else: p.cval = pv(lv, rv)
-                # Calculations -> catch
-                except TypeError as e:
-                    self.print_depth_hashmap()
-                    print(lv, rv, l.cval, r.cval)
-                    raise e
-                # Debug
-                if out: print('.interpreter() -> | Depth:', curr_depth, '|Result:', p.cval)
-                if out and type(p.cval) == List: p.cval.printv()
-                # Assign calculated root value
-                # Todo: fix NotImplemented either assignment error
-                # Todo: or incorrect
-                self.root.cval = p.cval
-            curr_depth -= 1
+                    elif l.cval is not None:
+                        p.cval = pv(l.cval, rv)
+                    elif r.cval is not None:
+                        p.cval = pv(lv, r.cval)
+                    else:
+                        p.cval = pv(lv, rv)
+                    print(f"p.cval = {p.cval}")
+        # Debug
+        print(f"self.root.cval = {self.root.cval}")
+        print(f"self.root = {self.root}")
+        print(f"self.depth_hashmap.values())[0][0] = {list(self.depth_hashmap.values())[0][0]}")
+        print(f"list(self.depth_hashmap.values())[0][0] == self.root = {list(self.depth_hashmap.values())[0][0] == self.root}")
+        self.root.cval = list(self.depth_hashmap.values())[0][0].cval
         return self.root.cval
+
 
     def reset_cval_all_c(self):
         for d in range(0, 8):
@@ -327,40 +365,6 @@ class NodeStructure:
         rv.depth_max = max_depth - 1
         rv.genetic_makeup = 'copy'
         return rv
-
-    def copy_gui(self):
-        rootc, og   = self.root.__copy__()
-        q, qnext    = [], []
-        # Queue the originals (not copies to check for children)
-        # ... and to copy from
-        rootc.left  = og.left.__copy__(q)
-        rootc.right = og.right.__copy__(q)
-        rootc.left.parent, rootc.right.parent, = rootc, rootc
-        # Linking loop
-        while len(q) != 0:
-            copy, og = q.pop()
-            if not og.has_children(): continue
-            copy.left  = og.left.__copy__(q)
-            copy.right = og.right.__copy__(q)
-            copy.left.parent, copy.right.parent = copy, copy
-        pass
-        # End - Create NodeStructure from root value and return
-        rv = NodeStructure(root=rootc, gen_struc=False)
-        rv.refresh_depth_hashmap()
-        # Debug Debug Debug Debug
-        # print(">>> NodeStructure.__copy__(self) <<<")
-        # rv.print_depth_hashmap()
-        # Find max depth
-        max_depth = 0
-        while True:
-            if len(self.depth_hashmap[max_depth]) != 0:
-                max_depth += 1
-            else:
-                break
-        rv.depth_max = max_depth - 1
-        rv.genetic_makeup = 'copy'
-        return rv
-        pass
 
     def __str__(self):
         # try:

@@ -1,7 +1,7 @@
 from Classes         import NodeStructure, Node, List
 from GlobalVariables import measure_fitness, funcrepr, len_
-from GUI.Consts      import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str, CGREEN, RED
-from NodeGUI         import NodeGUI
+# from GUI.Consts      import BLACK, WHITE, D_BLUE, DRED, create_text, create_text_str, CGREEN, RED
+# from NodeGUI         import NodeGUI
 import pygame.draw
 
 
@@ -36,6 +36,87 @@ class NodeStructure:
 """
 
 
+WHITE   = (255, 255, 255)
+L1BLACK = (25, 25, 25)
+BLACK   = (0, 0, 0)
+D_BLUE  = (0, 32, 96)
+DRED    = (125, 0, 0)
+CGREEN  = (0, 145, 0)
+RED     = (145, 0, 0)
+
+
+def create_text(arr, font_size, color=BLACK) -> List[pygame.font.SysFont]:
+    rv = []
+    font = pygame.font.SysFont('chalkduster.tff', font_size)
+    if type(arr) == list:
+        for string in arr:
+            rv.append(font.render(string, True, color))
+    elif type(arr) == str:
+        rv.append(font.render(arr, True, color))
+    return rv
+
+def create_text_str(arr, font_size, color=BLACK) -> pygame.font.SysFont:
+    font = pygame.font.SysFont('chalkduster.tff', font_size)
+    if type(arr) == list:
+        raise TypeError("Use function create_text(...)")
+    elif type(arr) == str:
+        return font.render(arr, True, color)
+
+
+# ------ Class Definition Start ------
+class NodeGUI(Node):
+    def __init__(self, node, screen, left_=None, right_=None, parent_=None, debug=False):
+        super(NodeGUI, self).__init__(val=node.val, left=left_, right=right_, parent=parent_)
+        self.node          = node
+        self.l             = None
+        self.r             = None
+        self.p             = None
+        self.screen        = screen
+        self.color         = CGREEN
+        if debug: return
+        self.pygame_val    = self.init_pygame_val()
+        self.pygame_text   = create_text_str(self.pygame_val, 22, self.color)
+        self.pygame_textr  = self.pygame_text.get_rect()
+        self.pygame_radius = 18
+        self.pygame_coords = [0, int(self.pygame_radius)] # x,y
+        self.pygame_lwidth = 3 # 'line'-width (must be int)
+        self.pygame_lcolor = self.color
+        self.pygame_ncolor = BLACK
+
+    def init_pygame_text(self):
+        return create_text_str(self.pygame_val, 22, self.color)
+
+    def init_pygame_val(self):
+        # if type(self.val) != list and type(self.val) != int and type(self.val) != List:
+        if type(self.val) not in [List, list, int]:
+            return str.upper(funcrepr(self.val))
+        else: return str(self.val)
+
+    def set_pygame_coords(self, x, y):
+        """ Used in NodeStrucGUI.init_circle_objects(...) """
+        self.pygame_coords[0], self.pygame_coords[1] = x, y
+
+    def render(self):
+        """ This method draws each Node as a circle, layered with it's
+         respective value and any line(s) to it's children. """
+        sx, sy, sr = self.pygame_coords[0], self.pygame_coords[1], self.pygame_radius
+        # These lines draw a connecting line from a node to it's children
+        if type(self.l) == NodeGUI:
+            lx, ly = self.l.pygame_coords
+            pygame.draw.line(self.screen, self.pygame_lcolor, [sx, sy], [lx, ly], width=self.pygame_lwidth)
+        if type(self.r) == NodeGUI:
+            rx, ry = self.r.pygame_coords
+            pygame.draw.line(self.screen, self.pygame_lcolor, [sx, sy], [rx, ry], width=self.pygame_lwidth)
+        # Draw value
+        pygame.draw.circle(self.screen, self.pygame_ncolor, [sx, sy], sr)
+        self.pygame_textr.center = (sx, sy)
+        self.screen.blit(self.pygame_text, self.pygame_textr)
+
+    def __str__(self):
+        return f"<NodeGUI {self.val}>"
+# ------ Class Definition End ------
+
+
 # ------ Class Definition Start ------
 class NodeStructureGUI(NodeStructure):
     def __init__(self, screen, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True, ns=None):
@@ -53,15 +134,16 @@ class NodeStructureGUI(NodeStructure):
         self.color          = CGREEN
         self.circle_objects = self.init_circle_objects()
         self.root           = self.circle_objects[0][0] # NodeGUI
-        """ Debug """
+        """ Debug : Start """
         if ns != None:
             self.depth_hashmap  = ns.depth_hashmap
             self.circle_objects = self.init_circle_objects()
+            # print(f"DEBUG: {self.circle_objects}")
             self.root           = self.circle_objects[0][0]  # NodeGUI
             int_out = self.interpreter()
-            print(int_out)
+            print(f"NodeStructureGUI(NodeStructure).self.interpreter() = {int_out}")
             # print(self.depth_hashmap)
-        """ Debug """
+        """ Debug : End """
         self.pixel_width    = self.calc_pixel_width()
         self.pixel_height   = self.calc_pixel_height()
         self.hitbox         = self.init_hitbox()        # Rect = [x, y, w, h]
@@ -71,17 +153,18 @@ class NodeStructureGUI(NodeStructure):
         self.init_lrp()
 
     def inherit_(self, ns, screen):
-        gen_struc = False             # Do not generate new structure
-        nshashmp  = ns.depth_hashmap  # Shortcut to depth_hashmap
-        """ For loop changes each object.type to -> GUI-counter-part """
-        for i, arr in enumerate(ns.depth_hashmap.values()):
-            for i, node in enumerate(arr):
-                print(f"node .left .right = {node, node.left, node.right}")
-                arr[i] = NodeGUI(node, screen, left_=node.left, right_=node.right, parent_=node.parent)
-                print(f"node .left .right = {node, node.left, node.right}\n")
-            nshashmp[i] = arr
-        self.ns = nshashmp
-        return gen_struc
+        # gen_struc = False             # Do not generate new structure
+        # nshashmp  = ns.depth_hashmap  # Shortcut to depth_hashmap
+        # """ For loop changes each object.type to -> GUI-counter-part """
+        # for i, arr in enumerate(ns.depth_hashmap.values()):
+        #     for i, node in enumerate(arr):
+        #         print(f"node .left .right = {node, node.left, node.right}")
+        #         arr[i] = NodeGUI(node, screen, left_=node.left, right_=node.right, parent_=node.parent)
+        #         print(f"node .left .right = {node, node.left, node.right}\n")
+        #     nshashmp[i] = arr
+        # self.ns = nshashmp
+        # return gen_struc
+        pass
 
     def apply_y_offset(self, y_offset):
         """ This allows the user to scroll down """

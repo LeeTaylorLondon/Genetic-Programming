@@ -1,4 +1,5 @@
 from Classes import NodeStructure, GeneticProgram
+from GlobalVariables import measure_fitness
 
 
 """
@@ -6,7 +7,7 @@ from Classes import NodeStructure, GeneticProgram
 -1 <= x <= + 1
 [x] Function Set: +, -, %, *
 [x] Terminal Set: x, and constants chosen randomly between -5 and +5
-[x] Fitness: sum of absolute errors for x is an element of {-1.0, -0.9, ... 0.9, 1.0}
+[x] Fitness: sum of absolute errors for x is an element of {-1.0, -0.9, ..., 0.9, 1.0}
 [ ] Selection: fitness proportionate (roulette wheel) non elitist
     * This should be EASY - calculate odds proportionate to their fitness
     * Sum total fitness, % = fitness / sum(fitness)
@@ -30,14 +31,33 @@ if __name__ == '__main__':
     ''' Testing section '''
     print(">> EXECUTING: TESTS <<\n")
 
-    # for testruns in range(100):
-    # gp = GeneticProgram()
-    # s1, s2 = gp.selection(out=True)
-    # gp.perform_crossover(s1, s2)
-    # p1, p2, p3, p4 = gp.population
-
     gp = GeneticProgram()
-    gp.test_crossover()
+    print(gp.population[0])
+    _ = gp.population[0]
+
+    unexplored = [_.root]
+    i = 0
+    while len(unexplored) != 0:
+        popped = unexplored.pop()
+        unexplored.append(popped.left)
+        unexplored.append(popped.right)
+        unexplored = [n for n in unexplored if n != None]
+        print(i, popped)
+        i += 1
+
+    # for testruns in range(100_000):
+    #     gp = GeneticProgram()
+    #     s1 = gp.selection(debug=False)
+    #     s2 = gp.selection(debug=False)
+    #     gp.crossover([s1, s2], debug=False)
+    #     print(gp.population)
+    #     for node_ in gp.population:
+    #         if round(float(measure_fitness(node_)), 2) == 0:
+    #             print(node_.print_all_nodes()) # solve for printing a node structure
+    #             raise TypeError
+
+    # gp = GeneticProgram()
+    # gp.test_crossover()
 
     print(">> EXECUTING: TESTS FINISHED SUCCESSFULLY <<\n")
 

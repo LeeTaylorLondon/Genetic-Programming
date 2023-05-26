@@ -54,5 +54,8 @@ class NodeGUI(Node):
         self.screen.blit(self.pygame_text, self.pygame_textr)
 
     def __str__(self):
-        return f"<NodeGUI {self.val}>"
+        return f"<NodeGUI val={self.val}, cval={self.cval}>"
+
+    def __repr__(self):
+        return f"<NodeGUI val={self.val}, cval={self.cval}>"
 # ------ Class Definition End ------

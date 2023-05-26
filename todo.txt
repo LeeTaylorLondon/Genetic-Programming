@@ -1,0 +1,31 @@
+* [ ] When running GUI.py it will crash because it cannot calculate the F score.
+    This is because sometimes two ending nodes will be functions. This needs to be solved.
+    To visualize this problem, I suggest visualizing nodes that cannot be calculated.
+    To solve this problem I suggest ensuring all ending nodes are marked and converted into
+    values. Is this a problem during mutation or generation? By determining the root M or G,
+    then you may investigate that area of the code and solve it.
+
+* [ ] Not all lines are rendered :(
+
+* [ ] It is not rendering correctly such that it repeats and misses some nodes
+    leading to incorrect rendered values
+
+* [ ] Investigate and explain how the node structures are 'made' which are rendered.
+    Because the structures being 'made' and rendered are incorrect. Example:
+    DEBUG: [[<D=None|mul>], [<D=None|mul>, <D=None|sub>], [<D=None|mul>, <D=None|sub>],
+            [<D=None|-4>, <D=None|-1>, <D=None|1>, <D=None|-1>], [], [], [], []]
+
+
+### Node/Structure Generation - Solutions
+
+* [ ] NodeStructure.py line 149 - replace if statement with an array of nodes for the
+    current level (maybe + 1)
+
+* [ ] Force nodes at depth limit to become 'terms'
+
+* [ ] Force a pair of nodes without children to become 'terms'
+
+* [ ] Force a node without children to become a 'term'
+
+* [ ] _gs_force_children_pair - is not called if the structure cannot be
+    interpreted/calculated
