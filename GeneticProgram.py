@@ -1,4 +1,4 @@
-from Classes import NodeStructure
+from Classes import NodeStructure, Node
 from GlobalVariables import measure_fitness, obj_func, term_set, func_set
 from random import random as rf
 from random import randint as rand
@@ -7,9 +7,9 @@ from typing import List
 
 class GeneticProgram:
     def __init__(self, count=4):
-        self.pcount     = count
+        self.pcount = count
         self.population = [NodeStructure() for _ in range(count)]
-        self.pm         = [[ns.__copy__() for ns in self.population]]
+        # self.pm = [[ns.__copy__() for ns in self.population]]
 
     def __str__(self):
         return self.__repr__()
@@ -19,7 +19,7 @@ class GeneticProgram:
 
     def fitness_check(self):
         """ Check fitness of each population member """
-        for i,p in enumerate(self.population):
+        for i, p in enumerate(self.population):
             # if fitness of p is 0 then replace that one by index
             if measure_fitness(p, False) == 0.0:
                 return i
@@ -33,26 +33,15 @@ class GeneticProgram:
         """
         root_cval = self.population[i].root.cval
         objective = obj_func(None, out=False)
-        for x,y in zip(root_cval, objective):
+        for x, y in zip(root_cval, objective):
             if x != y: return False
         return True
-
-    def fitness_replace(self):
-        """ Replace unfit population member. Unfit -> fitness(p) = 0.0 """
-        while 0 < self.fitness_check() <= 3:
-            print('self.fitness_check()', self.fitness_check())
-            # print(self.population) # Redundant while NS.__repr__ is not fit.v.
-            replace_i = self.fitness_check()
-            print('replace_i', replace_i)
-            self.population[replace_i] = NodeStructure()
-            self.pm[0][replace_i] = NodeStructure()
-            print(self.population)
 
     def selection(self, debug=False):
         """ Select a population member proportionate to the
         fitness of the population """
         farr = [measure_fitness(ns) for ns in self.population]
-        plis = [f/sum(farr) for f in farr]
+        plis = [f / sum(farr) for f in farr]
         # Roll probability values
         roll = [plis[0]]
         for i, v in enumerate(plis[1:]):
@@ -62,61 +51,118 @@ class GeneticProgram:
         rfv, rv = rf(), -1
         for rp in roll[::-1]:
             if rfv < rp: rv = roll.index(rp)
-        if debug: print(f"plis={plis}\nroll={roll}\nrv={rv}")
+        # Debug
+        if debug:
+            print(f"plis={plis}\nroll={roll}\nrv={rv}")
         return rv
 
-    def crossover(self, sarr, debug):
-        s1, s2     = sarr
-        ns1, ns2   = self.population[s1], self.population[s2]
-        ns1c, ns2c = self.population[s1].__copy__(), self.population[s2].__copy__()
-        self.population.append(ns1c)
-        print(ns1)
-        print(ns1c)
-        return ns1c
+    def _rand_node(self, structure: NodeStructure):
+        # Get matrix of nodes and remove empty layers
+        node_matrix = list(structure.depth_hashmap.values())
+        node_matrix = [_ for _ in node_matrix if _ != []]
+        print(f"_rand_node.node_matrix = {node_matrix}")
+        # Remove top and bottom layers
+        # node_matrix.pop() # Remove bottom layer
+        node_matrix.reverse()
+        node_matrix.pop()  # Remove top layer
+        # Debug
+        print(f"_rand_node.node_matrix = {node_matrix}")
+        rand_arr = rand(0, len(node_matrix) - 1)
+        rand_nod = rand(0, len(node_matrix[rand_arr]) - 1)
+        return node_matrix[rand_arr][rand_nod]
+
+    def crossover(self, debug=False):
+        # Select two structures, s1 and s2
+        selections = [1, 1]
+        while selections[0] == selections[1]:
+            selections[0] = self.selection()
+            selections[1] = self.selection()
+        s1, s2 = self.copy(selections[0]), self.copy(selections[1])
+        # s1, s2 = self.population[selections[0]], self.population[selections[1]]
+        # Choose two random nodes and children n1, n2, n1l, n1r, n2l, n2r
+        n1, n2 = self._rand_node(s1), self._rand_node(s2)
+        n1l, n1r, n2l, n2r = n1.left, n1.right, n2.left, n2.right
+        #
+        print("reached end")
         pass
 
-    def dep_crossover(self, sarr, debug=True):
-        """ :param sarr: Selection Array contains index values for which
-        population members are to be selected. """
-        # Unpack selection array & assign values
-        s1, s2 = sarr
-        p1, p2 = self.population[s1].__copy__(), self.population[s2].__copy__()
-        # DEBUG
-        if debug:
-            print("BEFORE")
-            p1.print_depth_hashmap()
-            p2.print_depth_hashmap()
-        sn1 = selected_node1 = p1.rand_node()
-        sn2 = selected_node2 = p2.rand_node(ntype=sn1.eval_type())
-        # DEBUG
-        if debug:
-            print("^^ SN1 : SN2 ^^")
-            print(sn1)
-            print(sn2)
-            print("================================")
-        # Todo: change return condition here
-        # Do not perform crossover if two of the same type do not exist
-        if sn1.eval_type() != sn2.eval_type():
-            return
-        # Overwrite sn1.val
-        if sn2.val in func_set:
-            sn1.val = sn2.val
-        elif sn2.val in term_set and term_set.index(sn2.val) != 0:
-            sn1.val = term_set.index(sn2.val)
-        else:
-            sn1.val = term_set[0] # Todo: this might be wrong
-        # Reset computed-value
-        sn1.cval = None
-        p1.reset_cval_all_c()
-        # Overwrite left & right
-        sn1.left  = sn2.left
-        sn1.right = sn2.right
-        # DEBUG
-        if debug:
-            print("AFTER")
-            p1.print_depth_hashmap()
-            p2.print_depth_hashmap()
-        return p1, p2
+    def copy(self, population_member_index=0):
+        """ Return an equal structure made up of copied nodes. """
+        # For each node assign it an NID (NID = f'self.explore().index(node),{str(node.val)}'
+        unlinked_copied_nodes = []
+        nodes = list(self.population[population_member_index].explore())
+        # Generate NIDs
+        # Make a list of unlinked nodes with equal values
+        for node in nodes:
+            node.nid = f'{nodes.index(node)},{str(node.val)}'
+            unlinked_copied_nodes.append(Node(node.val))
+            unlinked_copied_nodes[-1].nid = node.nid
+        # Store links
+        #   key = node.nid, value = [node.parent.nid, node.left.nid, node.right.nid]
+        #   example dict item -> ('1,X', ['0,<function div at 0x000002982BA07E20>', None, None])
+        links_dict = {}
+        for node in nodes:
+            key = node.nid
+            value = []
+            for linked_node in node.get_links():
+                if linked_node != None:
+                    value.append(linked_node.nid)
+                else:
+                    value.append(None)
+            links_dict.update({key: value})
+        # # Debug
+        # for _ in links_dict.items():
+        #     print(f"dict.item={_}")
+        # Debug
+        # print(f"unlinked_copied_nodes = {unlinked_copied_nodes}\n")
+        """ 
+        # Prove original Node.nid and unlinked_copied_nodes[?].nid matches
+        rand_node_index = rand(0, len(nodes) - 1)
+        rand_node = nodes[rand_node_index]
+        print(rand_node, rand_node.nid, links_dict[rand_node.nid]) 
+        """
+        # Be able to match a node.nid to an actual node in the unlinked_list
+        # Therefore create a dictionary for unlinked_nodes to get an unlinked node
+        #   ... by index-slicing by their
+        # ---
+        # Create a dictionary of unlinked node IDs to nodes (read .update(...) line)
+        unlinked_nodes_dict = {}
+        for node in unlinked_copied_nodes:
+            unlinked_nodes_dict.update({node.nid: node})
+        # Link nodes to left and right
+        # Too many if-else statements :( but it works! :D
+        for unlinked_node in unlinked_copied_nodes:
+            parent_nid, left_nid, right_nid = links_dict[unlinked_node.nid]
+            # parent
+            if parent_nid is not None:
+                unlinked_node.parent = unlinked_nodes_dict[parent_nid]
+            else:
+                unlinked_node.parent = None
+            # left
+            if left_nid is not None:
+                unlinked_node.left = unlinked_nodes_dict[left_nid]
+            else:
+                unlinked_node.left = None
+            # left
+            if right_nid is not None:
+                unlinked_node.right = unlinked_nodes_dict[right_nid]
+            else:
+                unlinked_node.right = None
+        """
+        # Prove parents are linked correctly
+        rand_node_index = rand(0, len(nodes) - 1)
+        rand_node = nodes[rand_node_index]
+        print(
+            f"rand_node, rand_node.nid, links_dict[rand_node.nid] = {rand_node, rand_node.nid, links_dict[rand_node.nid]}")
+        print(f"parents = {rand_node.parent, unlinked_nodes_dict[rand_node.nid].parent}")
+        print(f"left = {rand_node.left, unlinked_nodes_dict[rand_node.nid].left}")
+        print(f"right = {rand_node.right, unlinked_nodes_dict[rand_node.nid].right}")
+        """
+        # print(f"nodes = {nodes}")
+        print(f"unlinked_copied_nodes = {unlinked_copied_nodes}")
+        node_structure_copy = NodeStructure(root=unlinked_copied_nodes[0], gen_struc=False)
+        print(f"node_structure_copy.depth_hashmap = {node_structure_copy.depth_hashmap}")
+        return node_structure_copy
 
     def move_popualtion(self):
         """ Moves the population from self.population into
@@ -175,6 +221,13 @@ class GeneticProgram:
         #         raise e
         pass
 
+
 def test_crossover():
     print("Method not written.")
     pass
+
+
+if __name__ == '__main__':
+    gp = genetic_program_object = GeneticProgram(count=4)
+    gp.crossover()
+    # gp.copy()

@@ -6,9 +6,11 @@ from random             import random
 
 """ -- Class Containing Nodes -- """
 class NodeStructure:
-    def __init__(self, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True):
-        if root is None: self.root = Node(func_set[rand(0, 3)], None, None, None)
-        else: self.root = root
+    def __init__(self, root=None, depth_lim_lower=1, depth_lim_upper=3, gen_struc=True, gen_struc_out=True):
+        if root is None:
+            self.root = Node(func_set[rand(0, 3)], None, None, None)
+        else:
+            self.root = root
         self.depth_lim  = rand(depth_lim_lower, depth_lim_upper)
         self.depth_max  = self.depth_lim
         self.depth_hashmap = self.init_depth_hashmap()
@@ -17,7 +19,11 @@ class NodeStructure:
         self.queued  = False
         self.genetic_makeup = 'natural'
         # Generate structure of functions and terms
-        if gen_struc: self.gen_structure()
+        if gen_struc:
+            self.gen_structure(out=gen_struc_out)
+        else:
+            self.depth_max = self.calc_max_depth()
+            self.refresh_depth_hashmap()
         self.depth_lim = max(self.depth_lim, self.depth_max)
 
     ''' Depth methods '''
@@ -51,54 +57,16 @@ class NodeStructure:
         """ After a structure change the depth_hashmap
          needs to be updated to represent the new structure.
         """
-        self.depth_hashmap = self.init_depth_hashmap()
-        # for d in range(0, self.depth_lim):
-        # for d in range(0, self.find_max_depth() + 1):
-        for d in range(0, 8):
-            # dn = node at depth, d.
-            for dn in range(0, len(self.depth_hashmap[d])):
-                lr = [self.depth_hashmap[d][dn].left,
-                      self.depth_hashmap[d][dn].right]
-                # Store children in depth_hashmap against depth
-                left, right = lr[0], lr[1]
-                if left is None and right is None: continue
-                if left is not None and right is not None:
-                    drtemp = right.eval_depth()
-                    self.depth_hashmap[drtemp].append(left)
-                    self.depth_hashmap[drtemp].append(right)
-                elif left is None:
-                    drtemp = right.eval_depth()
-                    self.depth_hashmap[drtemp].append(left)
-                    self.depth_hashmap[drtemp].append(right)
-                elif right is None:
-                    dltemp = left.eval_depth()
-                    self.depth_hashmap[dltemp].append(left)
-                    self.depth_hashmap[dltemp].append(right)
-        pass
-
-    def find_max_depth(self, update_self=True):
-        """ Returns the height of the deepest Node.
-         self.depth_max is updated. """
-        # Init depth, max_depth, queue (q), queue_popped (qp)
-        d, max_d = int(self.depth_lim), int(self.depth_lim)
-        qp, q = [node for node in self.depth_hashmap[d]],\
-                [node for node in self.depth_hashmap[d]]
-        # While there are more Node(s) to process execute...
-        while len(q) != 0:
-            # Current node is popped from the queue
-            node = q.pop()
-            # Check current node depth is higher than max_depth
-            if node.eval_depth() > max_d: max_d = node.eval_depth()
-            # Append any children to the queue for processing
-            if node.left is not None and node.left not in qp:
-                q.extend([node.left])
-                qp.append(node.left)
-            if node.right is not None and node.right not in qp:
-                q.extend([node.right])
-                qp.append(node.right)
-        # Update self.depth_max and return max_value found
-        # if update_self: self.depth_max = max_d
-        return max_d
+        # Handle depth hashmap
+        for node in list(self.explore()):
+            # Populate depth hashmap for interpreter to perform calculations for fitness calc.
+            the_list = self.depth_hashmap.get(node.eval_depth())
+            the_list.append(node)
+            self.depth_hashmap.update({node.eval_depth(): the_list})
+        # Depth hashmap, depth 0 is wrong - this solves it
+        self.depth_hashmap.update({0: [self.depth_hashmap.get(0)[0]]})
+        print(self.depth_hashmap.values())
+        # return self.depth_hashmap
 
     def set_node_depths(self):
         """ Set Node.depth for each Node in a NodeStruc
@@ -147,16 +115,14 @@ class NodeStructure:
             yield popped
 
     def calc_max_depth(self):
-        """ Calculate and return the maximum depth.
-        todo: investigate why this returns 0 sometimes
-            when it should not.
-        """
+        """ Calculate and return the maximum depth. """
         return_val = 0
         for node in self.explore():
             return_val = max(return_val, node.eval_depth())
         return return_val
 
     def change_self(self):
+        """ This might be the equivalent to mutation. """
         ...
 
     def gen_children(self, node, types=[-1, -1]):
@@ -175,7 +141,7 @@ class NodeStructure:
         # Mark EOF
         return left, right
 
-    def gen_structure(self):
+    def gen_structure(self, out=True):
         """ Generate a NodeStructure """
         # Generate a structure of nodes
         # While not at depth limit or no more branches
@@ -194,8 +160,9 @@ class NodeStructure:
             if node.eval_depth() == self.calc_max_depth() - 1:
                 self.gen_children(node, types=[1, 1])
             if node.eval_type() == 'func' and (node.left is None or node.right is None):
-                print(f"node.eval_type() == 'func' and (node.left is None or node.right is None) -> "
-                      f"{node, node.val, node.left, node.right}")
+                if out:
+                    print(f"node.eval_type() == 'func' and (node.left is None or node.right is None) -> "
+                          f"{node, node.val, node.left, node.right}")
                 new_nodes = self.gen_children(node, types=[1, 1])
         # Handle depth hashmap
         for node in self.explore():
@@ -207,12 +174,13 @@ class NodeStructure:
         self.depth_hashmap.update({0: [self.depth_hashmap.get(0)[0]]})
         # ---
         # Out the nodes to the console
-        print('NodeStructure.gen_structure()')
-        for node in self.explore():
-            print(node)
-        print(self.depth_hashmap)
-        print('NodeStructure.gen_structure() END')
-        print()
+        if out:
+            print('NodeStructure.gen_structure()')
+            for node in self.explore():
+                print(node)
+            print(self.depth_hashmap)
+            print('NodeStructure.gen_structure() END')
+            print()
         # Update the depth hashmap
 
         pass
@@ -259,7 +227,6 @@ class NodeStructure:
         self.root.cval = list(self.depth_hashmap.values())[0][0].cval
         return self.root.cval
 
-
     def reset_cval_all_c(self):
         for d in range(0, 8):
             for dn in range(0, len(self.depth_hashmap[d]) - 1):
@@ -301,28 +268,6 @@ class NodeStructure:
         return node_arr[rand(0, len(node_arr) - 1)]
 
     ''' Other methods '''
-    def yield_all_nodes(self):
-        """ Yields each Node from a collection of Node(s) """
-        q = [self.root]
-        while len(q) != 0:
-            q_top = q.pop()
-            if isinstance(q_top.left, Node) and q_top.left is not None:
-                q.append(q_top.left)
-            if isinstance(q_top.right, Node) and q_top.right is not None:
-                q.append(q_top.right)
-            yield q_top, q
-            if q is []: return
-        return
-
-    def count_funcs(self):
-        """ For function node is counted, count is returned """
-        ynodes, count = self.yield_all_nodes(), 0
-        while True:
-            yield_return = ynodes.next()
-            if yield_return[0].eval_type() == 'func': count += 1
-            if len(yield_return[1]) == 0:
-                return count
-
     def print_all_nodes(self):
         """ For the data of each node in a collection is printed to the console """
         ynodes = self.yield_all_nodes()
@@ -332,39 +277,6 @@ class NodeStructure:
             print("nodes.next() -> " + str(yield_return[0]))
             if len(yield_return[1]) == 0:
                 return
-
-    def __copy__(self):
-        rootc, og   = self.root.__copy__()
-        q, qnext    = [], []
-        # Queue the originals (not copies to check for children)
-        # ... and to copy from
-        rootc.left  = og.left.__copy__(q)
-        rootc.right = og.right.__copy__(q)
-        rootc.left.parent, rootc.right.parent, = rootc, rootc
-        # Linking loop
-        while len(q) != 0:
-            copy, og = q.pop()
-            if not og.has_children(): continue
-            copy.left  = og.left.__copy__(q)
-            copy.right = og.right.__copy__(q)
-            copy.left.parent, copy.right.parent = copy, copy
-        pass
-        # End - Create NodeStructure from root value and return
-        rv = NodeStructure(root=rootc, gen_struc=False)
-        rv.refresh_depth_hashmap()
-        # Debug Debug Debug Debug
-        # print(">>> NodeStructure.__copy__(self) <<<")
-        # rv.print_depth_hashmap()
-        # Find max depth
-        max_depth = 0
-        while True:
-            if len(self.depth_hashmap[max_depth]) != 0:
-                max_depth += 1
-            else:
-                break
-        rv.depth_max = max_depth - 1
-        rv.genetic_makeup = 'copy'
-        return rv
 
     def __str__(self):
         # try:

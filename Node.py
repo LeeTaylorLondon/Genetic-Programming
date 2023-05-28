@@ -32,6 +32,10 @@ class Node:
         else:
             return False
 
+    def get_links(self):
+        """ Return a list of refs in order [parent, left, right] """
+        return [self.parent, self.left, self.right]
+
     def eval_type(self):
         if func_set.__contains__(self.val):
             return "func"
