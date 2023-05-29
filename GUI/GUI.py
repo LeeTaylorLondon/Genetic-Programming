@@ -20,7 +20,12 @@ class Window:
         self.popsize = 5
         self.gens    = 0
         self.gp      = GeneticProgram(count=self.popsize)
-        self.ns      = [[NodeStructureGUI(self.screen, ns=ns, gen_struc=False) for ns in self.gp.population]]
+        self.ns      = [
+            [NodeStructureGUI(self.screen, ns=ns, gen_struc=False) for ns in self.gp.population],
+            [NodeStructureGUI(self.screen, ns=self.gp.crossover(), gen_struc=False)]
+        ]
+
+        print(f"self.ns[1][0].depth_hashmap = {self.ns[1][0].depth_hashmap}")
 
         # # What is this?!
         # for _ in range(self.gens):

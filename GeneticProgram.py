@@ -37,7 +37,7 @@ class GeneticProgram:
             if x != y: return False
         return True
 
-    def selection(self, debug=False):
+    def _selection(self, debug=False):
         """ Select a population member proportionate to the
         fitness of the population """
         farr = [measure_fitness(ns) for ns in self.population]
@@ -56,6 +56,14 @@ class GeneticProgram:
             print(f"plis={plis}\nroll={roll}\nrv={rv}")
         return rv
 
+    def selection(self):
+        # Select two structures, s1 and s2
+        selections = [1, 1]
+        while selections[0] == selections[1]:
+            selections[0] = self._selection()
+            selections[1] = self._selection()
+        return self.copy(selections[0]), self.copy(selections[1])
+
     def _rand_node(self, structure: NodeStructure):
         # Get matrix of nodes and remove empty layers
         node_matrix = list(structure.depth_hashmap.values())
@@ -72,19 +80,34 @@ class GeneticProgram:
         return node_matrix[rand_arr][rand_nod]
 
     def crossover(self, debug=False):
-        # Select two structures, s1 and s2
-        selections = [1, 1]
-        while selections[0] == selections[1]:
-            selections[0] = self.selection()
-            selections[1] = self.selection()
-        s1, s2 = self.copy(selections[0]), self.copy(selections[1])
+        # # Select two structures, s1 and s2
+        # selections = [1, 1]
+        # while selections[0] == selections[1]:
+        #     selections[0] = self.selection()
+        #     selections[1] = self.selection()
+        # s1, s2 = self.copy(selections[0]), self.copy(selections[1])
+        s1, s2 = self.selection()
+        print(f"s1.depth_hashmap = {s1.depth_hashmap}")
         # s1, s2 = self.population[selections[0]], self.population[selections[1]]
         # Choose two random nodes and children n1, n2, n1l, n1r, n2l, n2r
         n1, n2 = self._rand_node(s1), self._rand_node(s2)
-        n1l, n1r, n2l, n2r = n1.left, n1.right, n2.left, n2.right
-        #
+        print(f"(nodes) n1, n2 = {n1, n2}")
+        # We must change the left or right of n1 to n2
+        # left = 0, right = 1
+        rand_int = rand(0, 1)
+        if rand_int == 0:
+            n1.left = n2
+        else:
+            n1.right = n2
+        print(f"n2.parent = {n2.parent}")
+        n2.parent = n1
+        print(f"n2.parent = {n2.parent}")
+        print(f"s1.depth_hashmap = {s1.depth_hashmap}")
         print("reached end")
-        pass
+        s1.init_depth_hashmap()
+        s1.refresh_depth_hashmap()
+        print(f"self.ns[1][0].depth_hashmap = s1.depth_hashmap = {s1.depth_hashmap}")
+        return s1
 
     def copy(self, population_member_index=0):
         """ Return an equal structure made up of copied nodes. """
