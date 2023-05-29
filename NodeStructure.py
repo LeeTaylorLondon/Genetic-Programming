@@ -27,6 +27,14 @@ class NodeStructure:
         self.depth_lim = max(self.depth_lim, self.depth_max)
 
     ''' Depth methods '''
+    def clear_depth_hashmap(self):
+        """ Initialise a blank hashmap starting with the root.
+         Used in gen_structure to become multi-level.
+         Used in crossover to represent the new structure. """
+        rv = {0: [self.root]}
+        for d in range(1, 16): rv.update({d: []})
+        self.depth_hashmap = rv
+
     def init_depth_hashmap(self):
         """ Initialise a blank hashmap starting with the root.
          Used in gen_structure to become multi-level.
@@ -65,8 +73,8 @@ class NodeStructure:
             self.depth_hashmap.update({node.eval_depth(): the_list})
         # Depth hashmap, depth 0 is wrong - this solves it
         self.depth_hashmap.update({0: [self.depth_hashmap.get(0)[0]]})
-        print(self.depth_hashmap.values())
-        # return self.depth_hashmap
+        # print(self.depth_hashmap.values())
+        # return self.depth_hashmaps
 
     def set_node_depths(self):
         """ Set Node.depth for each Node in a NodeStruc
@@ -186,7 +194,7 @@ class NodeStructure:
         pass
 
     ''' Interpreter methods '''
-    def interpreter(self, out=True):
+    def interpreter(self, out=False):
         """ Interprets each depth of a NodeStructure,
          storing the calculated values in Node(s) under
          their attribute .cval. The final result is found

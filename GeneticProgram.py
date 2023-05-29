@@ -68,45 +68,53 @@ class GeneticProgram:
         # Get matrix of nodes and remove empty layers
         node_matrix = list(structure.depth_hashmap.values())
         node_matrix = [_ for _ in node_matrix if _ != []]
-        print(f"_rand_node.node_matrix = {node_matrix}")
+        # print(f"_rand_node.node_matrix = {node_matrix}")
         # Remove top and bottom layers
         # node_matrix.pop() # Remove bottom layer
         node_matrix.reverse()
         node_matrix.pop()  # Remove top layer
         # Debug
-        print(f"_rand_node.node_matrix = {node_matrix}")
+        # print(f"_rand_node.node_matrix = {node_matrix}")
         rand_arr = rand(0, len(node_matrix) - 1)
         rand_nod = rand(0, len(node_matrix[rand_arr]) - 1)
         return node_matrix[rand_arr][rand_nod]
 
     def crossover(self, debug=False):
         # # Select two structures, s1 and s2
-        # selections = [1, 1]
-        # while selections[0] == selections[1]:
-        #     selections[0] = self.selection()
-        #     selections[1] = self.selection()
-        # s1, s2 = self.copy(selections[0]), self.copy(selections[1])
         s1, s2 = self.selection()
-        print(f"s1.depth_hashmap = {s1.depth_hashmap}")
-        # s1, s2 = self.population[selections[0]], self.population[selections[1]]
-        # Choose two random nodes and children n1, n2, n1l, n1r, n2l, n2r
+        # Choose two random nodes
+        attempts = 0
         n1, n2 = self._rand_node(s1), self._rand_node(s2)
+        while (n1.eval_type() == 'term' or n1 == n2) and attempts < 100:
+            n1, n2 = self._rand_node(s1), self._rand_node(s2)
+            attempts += 1
+        if attempts == 100:
+            return s1
+        print("-----")
         print(f"(nodes) n1, n2 = {n1, n2}")
+        print(f"(structures) s1, s2 = \n{s1.depth_hashmap}\n{s2.depth_hashmap}")
+        print("-----")
         # We must change the left or right of n1 to n2
         # left = 0, right = 1
         rand_int = rand(0, 1)
         if rand_int == 0:
             n1.left = n2
+            # if n1.eval_type() == 'term' and n2.eval_type() == 'term':
+            #     return -1
         else:
             n1.right = n2
-        print(f"n2.parent = {n2.parent}")
+            # if n1.eval_type() == 'term' and n2.eval_type() == 'term':
+            #     return -1
+        # Change parent
         n2.parent = n1
-        print(f"n2.parent = {n2.parent}")
-        print(f"s1.depth_hashmap = {s1.depth_hashmap}")
-        print("reached end")
-        s1.init_depth_hashmap()
+        # Update depth hashmap
+        # s2.init_depth_hashmap()
+        # s2.refresh_depth_hashmap()
+        s1.clear_depth_hashmap()
         s1.refresh_depth_hashmap()
-        print(f"self.ns[1][0].depth_hashmap = s1.depth_hashmap = {s1.depth_hashmap}")
+        print(f"list(s1.explore()) = {list(s1.explore())}")
+        print(f"(structures) s1, s2 = \n{s1.depth_hashmap}\n{s2.depth_hashmap}")
+        print("-----")
         return s1
 
     def copy(self, population_member_index=0):
@@ -133,11 +141,6 @@ class GeneticProgram:
                 else:
                     value.append(None)
             links_dict.update({key: value})
-        # # Debug
-        # for _ in links_dict.items():
-        #     print(f"dict.item={_}")
-        # Debug
-        # print(f"unlinked_copied_nodes = {unlinked_copied_nodes}\n")
         """ 
         # Prove original Node.nid and unlinked_copied_nodes[?].nid matches
         rand_node_index = rand(0, len(nodes) - 1)
@@ -176,15 +179,16 @@ class GeneticProgram:
         rand_node_index = rand(0, len(nodes) - 1)
         rand_node = nodes[rand_node_index]
         print(
-            f"rand_node, rand_node.nid, links_dict[rand_node.nid] = {rand_node, rand_node.nid, links_dict[rand_node.nid]}")
+            f"rand_node, rand_node.nid, links_dict[rand_node.nid] = {rand_node, 
+                    rand_node.nid, links_dict[rand_node.nid]}")
         print(f"parents = {rand_node.parent, unlinked_nodes_dict[rand_node.nid].parent}")
         print(f"left = {rand_node.left, unlinked_nodes_dict[rand_node.nid].left}")
         print(f"right = {rand_node.right, unlinked_nodes_dict[rand_node.nid].right}")
         """
         # print(f"nodes = {nodes}")
-        print(f"unlinked_copied_nodes = {unlinked_copied_nodes}")
+        # print(f"unlinked_copied_nodes = {unlinked_copied_nodes}")
         node_structure_copy = NodeStructure(root=unlinked_copied_nodes[0], gen_struc=False)
-        print(f"node_structure_copy.depth_hashmap = {node_structure_copy.depth_hashmap}")
+        # print(f"node_structure_copy.depth_hashmap = {node_structure_copy.depth_hashmap}")
         return node_structure_copy
 
     def move_popualtion(self):

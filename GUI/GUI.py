@@ -22,8 +22,13 @@ class Window:
         self.gp      = GeneticProgram(count=self.popsize)
         self.ns      = [
             [NodeStructureGUI(self.screen, ns=ns, gen_struc=False) for ns in self.gp.population],
-            [NodeStructureGUI(self.screen, ns=self.gp.crossover(), gen_struc=False)]
+            [NodeStructureGUI(self.screen, ns=self.gp.crossover(), gen_struc=False) for ns in self.gp.population]
         ]
+
+        # crossover_result = NodeStructureGUI(self.screen, ns=self.gp.crossover(), gen_struc=False)
+        # while crossover_result == -1:
+        #     crossover_result =
+        # self.ns.append([crossover_result])
 
         print(f"self.ns[1][0].depth_hashmap = {self.ns[1][0].depth_hashmap}")
 
