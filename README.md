@@ -34,4 +34,4 @@ This renders the contents of the program for useability and debugging purposes
 
 ## Project Contents Overview
 
-![Program GUI](https://github.com/LeeTaylorNewcastle/Genetic-Programming/blob/main/imgs/gui.png?raw=true)
+![Program GUI](https://github.com/LeeTaylorNewcastle/Genetic-Programming/blob/main/imgs/gui2.png?raw=true)
